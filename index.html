@@ -114,7 +114,6 @@ const SVC = "000078b2-0000-1000-8000-00805f9b34fb";
 const CW = "00008a21-0000-1000-8000-00805f9b34fb";   // poids
 const CB = "00008a22-0000-1000-8000-00805f9b34fb";   // composition
 const CC = "00008a81-0000-1000-8000-00805f9b34fb";   // commande
-const EPOCH = 1262304000;                            // horloge balance : secondes depuis le 01/01/2010
 const $ = s => document.querySelector(s);
 
 /* ---------- Stockage ---------- */
@@ -246,61 +245,51 @@ const renderAll = () => { renderHome(); renderHist() };
 
 /* ---------- Bluetooth (logique issue du fichier de base) ---------- */
 function setBle(state, label) { const b = $("#ble"); b.className = "pill " + state; b.querySelector("span").textContent = label }
-const pending = new Map();   // pesées en cours de réception, regroupées par horodatage balance
-let flushT;
-const slot = ts => { if (!pending.has(ts)) pending.set(ts, { ts }); return pending.get(ts) };
-
+let cur = null, saveT;   // pesée en cours (créée au clic, comme dans la version d'origine)
+const newRec = () => ({ id: crypto.randomUUID ? crypto.randomUUID() : "id_" + Date.now() + "_" + Math.random().toString(36).slice(2, 11), timestamp: new Date().toISOString(), weight: null, fat: null, water: null, muscle: null, bone: null, kcal: null, userId: null });
+function commit() {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    if (cur && cur.weight !== null) {
+      const list = records(); list.unshift(cur); put(K, list);
+      toast(`Pesée enregistrée : ${fm(cur.weight)} kg`); $("#st").textContent = "Mesure enregistrée avec succès !";
+      cur = null; renderAll();
+    }
+  }, 2000);
+}
 function onWeight(v) {
-  if (v.byteLength < 14) return;
-  const p = slot(v.getUint32(5, true));
-  p.weight = parseFloat((v.getUint16(1, true) / 100).toFixed(2));
-  p.userId = v.getUint8(13);
-  $("#w").textContent = fm(p.weight); $("#wt").textContent = "Mesure en cours…";
-  armFlush();
+  if (!cur) cur = newRec();
+  cur.weight = parseFloat((v.getUint16(1, true) / 100).toFixed(2));
+  cur.userId = v.getUint8(13);
+  $("#w").textContent = fm(cur.weight); $("#wt").textContent = "Mesure en cours…";
+  commit();
 }
 function onBody(v) {
-  if (v.byteLength < 16) return;
-  const p = slot(v.getUint32(1, true)), f = o => parseFloat(((v.getUint16(o, true) & 0x0fff) / 10).toFixed(1));
-  p.kcal = v.getUint16(6, true); p.fat = f(8); p.water = f(10); p.muscle = f(12); p.bone = f(14);
-  armFlush();
-}
-const armFlush = () => { clearTimeout(flushT); flushT = setTimeout(flush, 2500) };
-function flush() {
-  const list = records(), now = Date.now(); let n = 0, last = null;
-  for (const p of pending.values()) {
-    if (p.weight == null) continue;
-    let ms = (p.ts + EPOCH) * 1000;
-    if (ms > now + 864e5 || ms < now - 730 * 864e5) ms = now;   // horloge balance incohérente : on utilise l'heure du téléphone
-    if (list.some(r => Math.abs(new Date(r.timestamp) - ms) < 60e3 && r.weight === p.weight)) continue;   // déjà enregistrée
-    const id = crypto.randomUUID ? crypto.randomUUID() : "id_" + ms + "_" + Math.random().toString(36).slice(2, 9);
-    list.push({ id, timestamp: new Date(ms).toISOString(), weight: p.weight, fat: p.fat ?? null, water: p.water ?? null, muscle: p.muscle ?? null, bone: p.bone ?? null, kcal: p.kcal ?? null, userId: p.userId ?? null });
-    n++; last = p;
-  }
-  pending.clear();
-  if (n) { put(K, list); toast(n > 1 ? `${n} pesées enregistrées` : `Pesée enregistrée : ${fm(last.weight)} kg`); $("#st").textContent = "Mesure enregistrée avec succès !" }
-  renderAll();
+  if (!cur) cur = newRec();
+  const f = o => parseFloat(((v.getUint16(o, true) & 0x0fff) / 10).toFixed(1));
+  cur.kcal = v.getUint16(6, true); cur.fat = f(8); cur.water = f(10); cur.muscle = f(12); cur.bone = f(14);
+  commit();
 }
 
 async function sync() {
   const btn = $("#sync"), st = $("#st");
   if (!navigator.bluetooth) { st.textContent = "Web Bluetooth indisponible : ouvre cette page dans Bluefy."; return toast("Ouvre la page dans Bluefy") }
-  btn.disabled = true; btn.classList.add("spin"); setBle("busy", "Recherche…"); st.textContent = "Recherche de la balance…";
+  cur = newRec(); btn.disabled = true; btn.classList.add("spin"); setBle("busy", "Recherche…"); st.textContent = "Recherche de la balance…";
   try {
     const dev = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: "02" }, { namePrefix: "BS44" }, { namePrefix: "Medisana" }, { services: [SVC] }],
       optionalServices: [SVC]
     });
-    dev.addEventListener("gattserverdisconnected", () => { setBle("", "BS444"); btn.disabled = false; btn.classList.remove("spin"); armFlush() });
+    dev.addEventListener("gattserverdisconnected", () => { setBle("", "BS444"); btn.disabled = false; btn.classList.remove("spin") });
     st.textContent = "Connexion BLE en cours…";
     const svc = await (await dev.gatt.connect()).getPrimaryService(SVC);
     const cw = await svc.getCharacteristic(CW); await cw.startNotifications();
-    cw.addEventListener("characteristicvaluechanged", e => onWeight(e.target.value));
+    cw.addEventListener("characteristicvaluechanged", e => { try { onWeight(e.target.value) } catch (x) { toast("Erreur poids : " + x.message) } });
     const cb = await svc.getCharacteristic(CB); await cb.startNotifications();
-    cb.addEventListener("characteristicvaluechanged", e => onBody(e.target.value));
-    // Handshake : mise à l'heure de la balance (0x02 + secondes depuis 2010, little-endian)
+    cb.addEventListener("characteristicvaluechanged", e => { try { onBody(e.target.value) } catch (x) { toast("Erreur composition : " + x.message) } });
+    // Handshake d'origine (octets magiques Transtek/Medisana)
     try {
-      const t = Math.floor(Date.now() / 1000) - EPOCH;
-      await (await svc.getCharacteristic(CC)).writeValue(new Uint8Array([2, t & 255, (t >> 8) & 255, (t >> 16) & 255, (t >>> 24) & 255]));
+      await (await svc.getCharacteristic(CC)).writeValue(new Uint8Array([0x02, 0x7b, 0x7b, 0xf6, 0x0d]));
     } catch (err) { console.warn("Handshake CMD optionnel :", err) }
     setBle("on", "Connectée"); st.textContent = "Connectée ! Monte sur la balance pieds nus…";
   } catch (err) {
