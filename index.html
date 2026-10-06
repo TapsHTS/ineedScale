@@ -2,334 +2,2071 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Medisana BS 444 Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>VitaDock BS444 - Suivi Santé</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
+      --bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+      --primary: #4338ca;
+      --primary-light: #6366f1;
+      --primary-soft: #ede9fe;
+      --primary-gradient: linear-gradient(135deg, #4338ca 0%, #6366f1 55%, #7c3aed 100%);
       --success: #16a34a;
-      --danger: #dc2626;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #1e293b;
+      --success-bg: #dcfce7;
+      --success-text: #15803d;
+      --warning: #f59e0b;
+      --warning-bg: #fef3c7;
+      --warning-text: #b45309;
+      --danger: #ef4444;
+      --border: #edf2f7;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 16px;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: max(95px, env(safe-area-inset-bottom));
     }
-    h1 { font-size: 1.4rem; text-align: center; margin-bottom: 20px; }
+
+    .app-viewport {
+      width: 100%;
+      max-width: 440px;
+      padding: 10px 18px 24px;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.22s ease-in-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Headers */
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 18px;
+      padding-top: 4px;
+    }
+
+    .screen-header .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 2px;
+      text-transform: capitalize;
+    }
+
+    .screen-header .title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+    }
+
+    .device-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: #e8f9ee;
+      color: #16a34a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .device-badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+    }
+
+    .header-icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Cards */
     .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    /* Hero Card (Accueil) */
+    .hero-card {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 22px 20px 18px;
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.28);
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .hero-label {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.88;
+    }
+
+    .hero-date {
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.78;
+    }
+
+    .hero-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
       margin-bottom: 16px;
     }
-    .btn-group {
+
+    .hero-weight-wrap {
       display: flex;
-      flex-direction: column;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .hero-weight {
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1.2px;
+    }
+
+    .hero-unit {
+      font-size: 18px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(8px);
+      padding: 5px 11px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .mini-chart {
+      width: 100%;
+      height: 50px;
+      margin-bottom: 8px;
+    }
+
+    .mini-chart svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .week-days {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.72;
+    }
+
+    /* Goal Progress Card */
+    .goal-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .goal-title-wrap {
+      display: flex;
+      align-items: center;
       gap: 10px;
     }
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 16px;
+
+    .goal-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .goal-title-wrap span {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: block;
+    }
+
+    .goal-title-wrap strong {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .goal-remaining-pill {
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 5px 11px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 10px;
+      background: #ede9fe;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      border-radius: var(--radius-full);
+      transition: width 0.4s ease;
+    }
+
+    .goal-milestones {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
       font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
     }
-    button:active { opacity: 0.8; }
-    .btn-main { background-color: var(--primary); color: white; }
-    .btn-export { background-color: var(--success); color: white; }
-    .btn-clear { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
-    #status {
-      font-size: 0.95rem;
-      margin-top: 10px;
-      text-align: center;
-      color: #64748b;
-    }
-    .stats-grid {
+
+    /* Metrics Grid 2x2 */
+    .metrics-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .stat-item {
-      background: #f1f5f9;
+
+    .metric-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 14px 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 104px;
+    }
+
+    .metric-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-icon {
+      width: 26px;
+      height: 26px;
       border-radius: 8px;
-      padding: 10px;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
     }
-    .stat-val { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-    .stat-lbl { font-size: 0.8rem; color: #64748b; }
+
+    .metric-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .metric-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 10px;
+    }
+
+    .metric-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+    }
+
+    .metric-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .metric-badge.neutral {
+      background: #f1f5f9;
+      color: var(--text-sub);
+    }
+
+    .metric-badge.warning {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .btn-sync {
+      width: 100%;
+      background: #111827;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(17, 24, 39, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .btn-sync:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    /* Screen 2: Évolution */
+    .filter-pills-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .filter-pills-row::-webkit-scrollbar { display: none; }
+
+    .pill-btn, .metric-pill-btn {
+      padding: 7px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 700;
+      background: #ffffff;
+      color: var(--text-sub);
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .pill-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .metric-pill-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    .chart-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .chart-title-wrap span {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .chart-title-wrap h2 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-top: 2px;
+    }
+
+    .chart-canvas-wrap {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .chart-canvas-wrap svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 600;
+      padding-top: 8px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .stats-summary-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-pill {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 12px 6px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-pill .lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stat-pill .val {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .stat-pill .val.green { color: var(--success); }
+    .stat-pill .val.red { color: var(--danger); }
+
+    .trend-banner {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .trend-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .trend-banner strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+    }
+
+    .trend-banner p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Screen 3: Corps */
+    .body-date-badge {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .imc-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    .imc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .imc-label-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .imc-val-wrap {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 14px;
+    }
+
+    .imc-val-wrap span {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .imc-slider-container {
+      position: relative;
+      margin-bottom: 8px;
+      padding-top: 10px;
+    }
+
+    .imc-track {
+      width: 100%;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(to right, #38bdf8 0%, #22c55e 35%, #f59e0b 70%, #ef4444 100%);
+    }
+
+    .imc-cursor {
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      background: #ffffff;
+      border: 3px solid #0f172a;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: left 0.3s ease;
+    }
+
+    .imc-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 6px;
+      padding: 0 30px;
+    }
+
+    .body-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .body-detail-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .body-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .body-detail-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .body-detail-val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .gauge-slider-wrap {
+      width: 100%;
+      height: 4px;
+      background: #f1f5f9;
+      border-radius: var(--radius-full);
+      position: relative;
+      margin: 10px 0 6px;
+    }
+
+    .gauge-slider-fill {
+      height: 100%;
+      background: #22c55e;
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+    }
+
+    .gauge-slider-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      position: absolute;
+      top: -3px;
+      transform: translateX(-50%);
+      transition: left 0.3s ease;
+    }
+
+    .body-detail-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .energy-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .energy-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .energy-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .energy-item .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .energy-item .val {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    /* Screen 4: Historique */
+    .history-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .btn-action-outline {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: var(--text-main);
+    }
+
+    .btn-action-outline.btn-csv {
+      background: var(--success);
+      color: #ffffff;
+      border-color: var(--success);
+    }
+
+    .history-table-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
-      margin-top: 10px;
+      font-size: 12px;
     }
+
     th, td {
-      padding: 8px 4px;
-      text-align: center;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #f1f5f9;
     }
-    th { color: #64748b; font-weight: 600; }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    td strong {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Bottom Nav Bar */
+    .bottom-tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #eef2f6;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 12px max(24px, env(safe-area-inset-bottom));
+      max-width: 440px;
+      margin: 0 auto;
+      z-index: 99;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .tab-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active .tab-icon-wrap {
+      background: var(--primary-soft);
+      border-radius: 12px;
+      padding: 3px 12px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-60px);
+      background: #111827;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Medisana BS 444</h1>
-
-  <div class="card">
-    <div class="btn-group">
-      <button id="btnConnect" class="btn-main">Se connecter & peser</button>
-      <button id="btnExport" class="btn-export">Exporter en CSV</button>
-      <button id="btnClear" class="btn-clear">Effacer l'historique</button>
-    </div>
-    <div id="status">En attente...</div>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">✨</span>
+    <span id="toastMessage">Notification</span>
   </div>
 
-  <div class="card" id="currentResultCard" style="display: none;">
-    <h3 style="margin-top:0; font-size:1rem;">Dernière mesure capturée</h3>
-    <div class="stats-grid">
-      <div class="stat-item"><div class="stat-val" id="resWeight">--</div><div class="stat-lbl">Poids (kg)</div></div>
-      <div class="stat-item"><div class="stat-val" id="resFat">--</div><div class="stat-lbl">Graisse (%)</div></div>
-      <div class="stat-item"><div class="stat-val" id="resMuscle">--</div><div class="stat-lbl">Muscle (%)</div></div>
-      <div class="stat-item"><div class="stat-val" id="resWater">--</div><div class="stat-lbl">Eau (%)</div></div>
-      <div class="stat-item"><div class="stat-val" id="resBone">--</div><div class="stat-lbl">Masse osseuse (kg)</div></div>
-      <div class="stat-item"><div class="stat-val" id="resKcal">--</div><div class="stat-lbl">BMR (kcal)</div></div>
+  <div class="app-viewport">
+
+    <!-- ================= SCREEN 1: ACCUEIL ================= -->
+    <div id="tab-accueil" class="tab-content active">
+      <div class="screen-header">
+        <div>
+          <div class="subtitle" id="currentDateStr">--</div>
+          <div class="title">Bonjour Clément</div>
+        </div>
+        <div class="device-badge">
+          <span class="dot"></span>
+          <span>BS444</span>
+        </div>
+      </div>
+
+      <!-- Hero Weight Card -->
+      <div class="hero-card">
+        <div class="hero-top">
+          <span class="hero-label">Dernière pesée</span>
+          <span class="hero-date" id="heroTimeStr">Aucune pesée</span>
+        </div>
+        <div class="hero-main">
+          <div class="hero-weight-wrap">
+            <span class="hero-weight" id="heroWeightVal">--,-</span>
+            <span class="hero-unit">kg</span>
+          </div>
+          <div class="hero-badge" id="heroBadgeWrapper" style="display: none;">
+            <svg id="heroBadgeArrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            <span id="heroDeltaVal">-- kg</span>
+          </div>
+        </div>
+
+        <!-- Mini Wave SVG -->
+        <div class="mini-chart">
+          <svg id="homeMiniSvg" viewBox="0 0 320 60" preserveAspectRatio="none">
+            <!-- Dynamically rendered -->
+          </svg>
+        </div>
+        <div class="week-days">
+          <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+        </div>
+      </div>
+
+      <!-- Goal Progress Card -->
+      <div class="goal-card">
+        <div class="goal-header">
+          <div class="goal-title-wrap">
+            <div class="goal-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="2" r="2"/></svg>
+            </div>
+            <div>
+              <span>Objectif</span>
+              <strong id="targetGoalStr">75,0 kg</strong>
+            </div>
+          </div>
+          <div class="goal-remaining-pill" id="goalRemainingStr">-- kg restants</div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="goalProgressBar" style="width: 0%;"></div>
+        </div>
+        <div class="goal-milestones">
+          <span id="goalStartStr">Départ 82,0 kg</span>
+          <span id="goalPercentStr">0 %</span>
+          <span id="goalTargetStr">Cible 75,0 kg</span>
+        </div>
+      </div>
+
+      <!-- 2x2 Metrics Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon" style="background: #fef3c7; color: #f59e0b;">🔥</div>
+            <span class="metric-title">Graisse</span>
+          </div>
+          <div class="metric-bottom">
+            <span class="metric-value" id="cardFatVal">--<small style="font-size:14px; font-weight:600;">%</small></span>
+            <span class="metric-badge neutral" id="cardFatBadge">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon" style="background: #e0f2fe; color: #0284c7;">💧</div>
+            <span class="metric-title">Eau</span>
+          </div>
+          <div class="metric-bottom">
+            <span class="metric-value" id="cardWaterVal">--<small style="font-size:14px; font-weight:600;">%</small></span>
+            <span class="metric-badge neutral" id="cardWaterBadge">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon" style="background: #ede9fe; color: #7c3aed;">⚡</div>
+            <span class="metric-title">Muscle</span>
+          </div>
+          <div class="metric-bottom">
+            <span class="metric-value" id="cardMuscleVal">--<small style="font-size:14px; font-weight:600;">%</small></span>
+            <span class="metric-badge neutral" id="cardMuscleBadge">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon" style="background: #f1f5f9; color: #64748b;">🦴</div>
+            <span class="metric-title">Os</span>
+          </div>
+          <div class="metric-bottom">
+            <span class="metric-value" id="cardBoneVal">--<small style="font-size:14px; font-weight:600;">kg</small></span>
+            <span class="metric-badge neutral" id="cardBoneBadge">stable</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button class="btn-sync" id="btnSync">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M19.5 8A9 9 0 0 0 5.68 5.68L2.5 8.5m19 7-3.18 2.82A9 9 0 0 1 4.5 16"/></svg>
+        <span>Synchroniser la balance</span>
+      </button>
     </div>
+
+
+    <!-- ================= SCREEN 2: ÉVOLUTION ================= -->
+    <div id="tab-evolution" class="tab-content">
+      <div class="screen-header">
+        <div>
+          <div class="subtitle">Suivi détaillé</div>
+          <div class="title">Évolution</div>
+        </div>
+        <button class="header-icon-btn" onclick="showToast('Affichage synchronisé', '📅')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </button>
+      </div>
+
+      <!-- Filter Range Pills -->
+      <div class="filter-pills-row" id="timeFilterRow">
+        <button class="pill-btn" data-range="7d">7J</button>
+        <button class="pill-btn active" data-range="30d">1M</button>
+        <button class="pill-btn" data-range="90d">3M</button>
+        <button class="pill-btn" data-range="365d">1A</button>
+        <button class="pill-btn" data-range="all">Tout</button>
+      </div>
+
+      <!-- Metric Pills -->
+      <div class="filter-pills-row" id="metricFilterRow">
+        <button class="metric-pill-btn active" data-metric="weight">Poids</button>
+        <button class="metric-pill-btn" data-metric="fat">Graisse</button>
+        <button class="metric-pill-btn" data-metric="water">Eau</button>
+        <button class="metric-pill-btn" data-metric="muscle">Muscle</button>
+        <button class="metric-pill-btn" data-metric="bone">Os</button>
+        <button class="metric-pill-btn" data-metric="imc">IMC</button>
+      </div>
+
+      <!-- Detailed Graph Card -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title-wrap">
+            <span id="chartRangeSubtitle">Poids · 30 derniers jours</span>
+            <h2 id="chartCurrentWeight">-- <small style="font-size:16px; font-weight:600;" id="chartCurrentUnit">kg</small></h2>
+          </div>
+          <span class="metric-badge" id="chartDeltaBadge" style="display:none; font-size:12px; padding:6px 12px;">--</span>
+        </div>
+
+        <div class="chart-canvas-wrap">
+          <svg id="mainEvolutionSvg" viewBox="0 0 340 180">
+            <!-- Dynamic functional chart -->
+          </svg>
+        </div>
+
+        <div class="chart-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#6366f1;"></span> Tendance</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#111827;"></span> Pesées</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span> Objectif</div>
+        </div>
+      </div>
+
+      <!-- 4 Stats Cards -->
+      <div class="stats-summary-row">
+        <div class="stat-pill">
+          <div class="lbl">Min</div>
+          <div class="val" id="statMin">--</div>
+        </div>
+        <div class="stat-pill">
+          <div class="lbl">Max</div>
+          <div class="val" id="statMax">--</div>
+        </div>
+        <div class="stat-pill">
+          <div class="lbl">Moyenne</div>
+          <div class="val" id="statAvg">--</div>
+        </div>
+        <div class="stat-pill">
+          <div class="lbl">Écart</div>
+          <div class="val" id="statDiff">--</div>
+        </div>
+      </div>
+
+      <!-- Forecast Trend Banner -->
+      <div class="trend-banner">
+        <div class="trend-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 16 7-7 4 4 7-7"/><path d="M16 6h5v5"/></svg>
+        </div>
+        <div>
+          <strong id="trendRateStr">Tendance en cours de calcul...</strong>
+          <p id="trendEstStr">Ajoutez des pesées pour projeter l'objectif.</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= SCREEN 3: CORPS ================= -->
+    <div id="tab-corps" class="tab-content">
+      <div class="screen-header">
+        <div>
+          <div class="subtitle">Composition corporelle</div>
+          <div class="title">Corps</div>
+        </div>
+        <span class="body-date-badge" id="bodyDateStr">--</span>
+      </div>
+
+      <!-- IMC Card with Gauge -->
+      <div class="imc-card">
+        <div class="imc-top">
+          <div class="imc-label-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Indice de masse corporelle</span>
+          </div>
+          <span class="metric-badge" id="imcCategoryBadge">--</span>
+        </div>
+        <div class="imc-val-wrap">
+          <strong id="imcValueStr">--</strong> <span>kg/m²</span>
+        </div>
+
+        <div class="imc-slider-container">
+          <div class="imc-track"></div>
+          <div class="imc-cursor" id="imcCursor"></div>
+        </div>
+        <div class="imc-ticks">
+          <span>18,5</span>
+          <span>25</span>
+          <span>30</span>
+        </div>
+      </div>
+
+      <!-- Detailed 4 Body Component Cards -->
+      <div class="body-metrics-grid">
+        <div class="body-detail-card">
+          <div class="body-detail-header">
+            <span class="body-detail-title">Masse grasse</span>
+            <span class="metric-badge" id="corpsFatBadge">--</span>
+          </div>
+          <div class="body-detail-val" id="corpsFatVal">--<small style="font-size:14px;">%</small></div>
+          <div class="gauge-slider-wrap">
+            <div class="gauge-slider-fill" id="corpsFatGaugeFill" style="width: 0%;"></div>
+            <div class="gauge-slider-thumb" id="corpsFatGaugeThumb" style="left: 0%;"></div>
+          </div>
+          <span class="body-detail-sub" id="corpsFatSub">--</span>
+        </div>
+
+        <div class="body-detail-card">
+          <div class="body-detail-header">
+            <span class="body-detail-title">Eau</span>
+            <span class="metric-badge" id="corpsWaterBadge">--</span>
+          </div>
+          <div class="body-detail-val" id="corpsWaterVal">--<small style="font-size:14px;">%</small></div>
+          <div class="gauge-slider-wrap">
+            <div class="gauge-slider-fill" id="corpsWaterGaugeFill" style="width: 0%;"></div>
+            <div class="gauge-slider-thumb" id="corpsWaterGaugeThumb" style="left: 0%;"></div>
+          </div>
+          <span class="body-detail-sub" id="corpsWaterSub">--</span>
+        </div>
+
+        <div class="body-detail-card">
+          <div class="body-detail-header">
+            <span class="body-detail-title">Muscle</span>
+            <span class="metric-badge" id="corpsMuscleBadge">--</span>
+          </div>
+          <div class="body-detail-val" id="corpsMuscleVal">--<small style="font-size:14px;">%</small></div>
+          <div class="gauge-slider-wrap">
+            <div class="gauge-slider-fill" id="corpsMuscleGaugeFill" style="width: 0%;"></div>
+            <div class="gauge-slider-thumb" id="corpsMuscleGaugeThumb" style="left: 0%;"></div>
+          </div>
+          <span class="body-detail-sub" id="corpsMuscleSub">--</span>
+        </div>
+
+        <div class="body-detail-card">
+          <div class="body-detail-header">
+            <span class="body-detail-title">Os</span>
+            <span class="metric-badge" id="corpsBoneBadge">--</span>
+          </div>
+          <div class="body-detail-val" id="corpsBoneVal">--<small style="font-size:14px;">kg</small></div>
+          <div class="gauge-slider-wrap">
+            <div class="gauge-slider-fill" id="corpsBoneGaugeFill" style="width: 0%;"></div>
+            <div class="gauge-slider-thumb" id="corpsBoneGaugeThumb" style="left: 0%;"></div>
+          </div>
+          <span class="body-detail-sub" id="corpsBoneSub">--</span>
+        </div>
+      </div>
+
+      <!-- Energy / Metabolism Card -->
+      <div class="energy-card">
+        <div class="energy-item">
+          <div class="energy-icon">🔥</div>
+          <div>
+            <div class="lbl">Métabolisme de base</div>
+            <div class="val" id="corpsBmrVal">-- kcal</div>
+          </div>
+        </div>
+        <div class="energy-item">
+          <div class="energy-icon">⚡</div>
+          <div>
+            <div class="lbl">Besoin quotidien</div>
+            <div class="val" id="corpsDailyVal">-- kcal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= SCREEN 4: HISTORIQUE ================= -->
+    <div id="tab-historique" class="tab-content">
+      <div class="screen-header">
+        <div>
+          <div class="subtitle">Journal des mesures</div>
+          <div class="title">Historique</div>
+        </div>
+        <span class="device-badge" id="historyTotalBadge">0 entrée</span>
+      </div>
+
+      <!-- History Top Actions -->
+      <div class="history-actions">
+        <button class="btn-action-outline btn-csv" id="btnExportCSV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exporter en CSV
+        </button>
+      </div>
+
+      <div class="history-table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Poids</th>
+              <th>Graisse</th>
+              <th>Muscle</th>
+              <th>Eau</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamic entries loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ================= SCREEN 5: PROFIL ================= -->
+    <div id="tab-profil" class="tab-content">
+      <div class="screen-header">
+        <div>
+          <div class="subtitle">Paramètres utilisateur</div>
+          <div class="title">Profil</div>
+        </div>
+      </div>
+
+      <div class="card" style="text-align: center; padding: 24px 18px;">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-size: 28px; font-weight:800; display:flex; align-items:center; justify-content:center; margin: 0 auto 12px;">
+          C
+        </div>
+        <h3 style="font-size: 18px; font-weight: 800;">Clément</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Pèse-personne Medisana BS 444 Connect</p>
+      </div>
+
+      <div class="card">
+        <h4 style="font-size: 14px; margin-bottom: 12px; font-weight: 700;">Objectifs & Morphologie</h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size:13px;">
+          <span style="color:var(--text-sub);">Taille</span>
+          <div>
+            <input type="number" id="inputHeight" value="178" style="width:60px; text-align:right; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; padding:4px;"> cm
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size:13px;">
+          <span style="color:var(--text-sub);">Poids de départ</span>
+          <div>
+            <input type="number" step="0.1" id="inputStartWeight" value="82.0" style="width:60px; text-align:right; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; padding:4px;"> kg
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size:13px;">
+          <span style="color:var(--text-sub);">Poids cible</span>
+          <div>
+            <input type="number" step="0.1" id="inputTargetWeight" value="75.0" style="width:60px; text-align:right; font-weight:700; color:var(--primary); border:1px solid #cbd5e1; border-radius:6px; padding:4px;"> kg
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding: 10px 0; font-size:13px;">
+          <span style="color:var(--text-sub);">Identifiant balance</span>
+          <strong>Utilisateur 1</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <button class="btn-action-outline" id="btnClearStorage" style="width:100%; color:var(--danger); border-color:#fecaca;">
+          Effacer toutes les pesées
+        </button>
+      </div>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h3 style="margin-top:0; font-size:1rem;">Historique (<span id="historyCount">0</span>)</h3>
-    <div style="overflow-x: auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Poids</th>
-            <th>Graisse</th>
-            <th>Muscle</th>
-          </tr>
-        </thead>
-        <tbody id="historyBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+  <!-- Bottom iOS Tab Bar -->
+  <nav class="bottom-tab-bar">
+    <button class="tab-btn active" data-tab="accueil">
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <span>Accueil</span>
+    </button>
 
-<script>
-  const STORAGE_KEY = "medisana_bs444_records";
-  const SERVICE_UUID = "000078b2-0000-1000-8000-00805f9b34fb";
-  const CHAR_WEIGHT   = "00008a21-0000-1000-8000-00805f9b34fb";
-  const CHAR_BODY     = "00008a22-0000-1000-8000-00805f9b34fb";
-  const CHAR_CMD      = "00008a81-0000-1000-8000-00805f9b34fb";
+    <button class="tab-btn" data-tab="evolution">
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <span>Évolution</span>
+    </button>
 
-  let currentRecord = null;
-  let saveTimeout = null;
+    <button class="tab-btn" data-tab="corps">
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <span>Corps</span>
+    </button>
 
-  // --- Gestion du LocalStorage ---
-  function getRecords() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch {
-      return [];
-    }
-  }
+    <button class="tab-btn" data-tab="historique">
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <span>Historique</span>
+    </button>
 
-  function saveRecord(record) {
-    const list = getRecords();
-    list.unshift(record);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    renderHistory();
-  }
+    <button class="tab-btn" data-tab="profil">
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <span>Profil</span>
+    </button>
+  </nav>
 
-  function renderHistory() {
-    const records = getRecords();
-    document.getElementById('historyCount').innerText = records.length;
-    const tbody = document.getElementById('historyBody');
-    tbody.innerHTML = "";
+  <!-- ================= JAVASCRIPT ================= -->
+  <script>
+    // Configuration BLE BS 444 Medisana
+    const BLE_SERVICE_UUID = "000078b2-0000-1000-8000-00805f9b34fb";
+    const BLE_CHAR_WEIGHT  = "00008a21-0000-1000-8000-00805f9b34fb";
+    const BLE_CHAR_BODY    = "00008a22-0000-1000-8000-00805f9b34fb";
+    const BLE_CHAR_CMD     = "00008a81-0000-1000-8000-00805f9b34fb";
 
-    records.slice(0, 15).forEach(r => {
-      const tr = document.createElement('tr');
-      const d = new Date(r.timestamp);
-      const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      tr.innerHTML = `
-        <td>${dateStr}</td>
-        <td><strong>${r.weight ?? '--'} kg</strong></td>
-        <td>${r.fat ? r.fat + '%' : '--'}</td>
-        <td>${r.muscle ? r.muscle + '%' : '--'}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+    const STORAGE_KEY = "vitadock_bs444_records";
+    const SETTINGS_KEY = "vitadock_bs444_settings";
 
-  // --- Export CSV ---
-  document.getElementById('btnExport').addEventListener('click', () => {
-    const records = getRecords();
-    if (!records.length) {
-      alert("Aucune donnée enregistrée à exporter.");
-      return;
-    }
-
-    const headers = ["ID", "Date_ISO", "Date_Locale", "Utilisateur", "Poids_kg", "Masse_Grasse_pct", "Eau_pct", "Muscle_pct", "Os_kg", "BMR_kcal"];
-    
-    const rows = records.map(r => {
-      const d = new Date(r.timestamp);
-      return [
-        r.id,
-        r.timestamp,
-        `"${d.toLocaleString()}"`,
-        r.userId ?? "",
-        r.weight ?? "",
-        r.fat ?? "",
-        r.water ?? "",
-        r.muscle ?? "",
-        r.bone ?? "",
-        r.kcal ?? ""
-      ].join(";");
-    });
-
-    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\r\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `medisana_bs444_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-
-  // --- Nettoyage ---
-  document.getElementById('btnClear').addEventListener('click', () => {
-    if (confirm("Voulez-vous vraiment supprimer tout l'historique ?")) {
-      localStorage.removeItem(STORAGE_KEY);
-      renderHistory();
-      document.getElementById('currentResultCard').style.display = 'none';
-    }
-  });
-
-  // --- BLE & Mesures ---
-  function initNewRecord() {
-    currentRecord = {
-      id: (crypto.randomUUID ? crypto.randomUUID() : 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)),
-      timestamp: new Date().toISOString(),
-      weight: null,
-      fat: null,
-      water: null,
-      muscle: null,
-      bone: null,
-      kcal: null,
-      userId: null
+    // Profil utilisateur modifiable
+    let userSettings = {
+      heightCm: 178,
+      startWeight: 82.0,
+      targetWeight: 75.0
     };
-  }
 
-  function commitRecordDelayed() {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-      if (currentRecord && currentRecord.weight !== null) {
-        saveRecord(currentRecord);
-        document.getElementById('status').innerText = "Mesure enregistrée avec succès !";
-        currentRecord = null;
-      }
-    }, 2000);
-  }
+    let records = [];
+    let currentWeighIn = null;
+    let saveDebounceTimer = null;
 
-  document.getElementById('btnConnect').addEventListener('click', async () => {
-    const status = document.getElementById('status');
-    try {
-      status.innerText = "Recherche de la balance...";
-      initNewRecord();
+    // Filtres actifs pour l'écran Évolution
+    let currentRange = "30d"; // '7d', '30d', '90d', '365d', 'all'
+    let currentMetric = "weight"; // 'weight', 'fat', 'water', 'muscle', 'bone', 'imc'
+    let activeHoverPointIndex = null;
 
-      // Filtrage ciblé inspiré d'openScale
-      const device = await navigator.bluetooth.requestDevice({
-        filters: [
-          { namePrefix: '02' },        // Préfixe Transtek/Medisana usine
-          { namePrefix: 'BS44' },      // Préfixe série BS 444
-          { namePrefix: 'Medisana' },
-          { services: [SERVICE_UUID] }
-        ],
-        optionalServices: [SERVICE_UUID]
-      });
-
-      status.innerText = "Connexion BLE en cours...";
-      const server = await device.gatt.connect();
-      const service = await server.getPrimaryService(SERVICE_UUID);
-
-      // 1. Trame Poids
-      const weightChar = await service.getCharacteristic(CHAR_WEIGHT);
-      await weightChar.startNotifications();
-      weightChar.addEventListener('characteristicvaluechanged', (e) => {
-        const v = e.target.value;
-        const weightRaw = v.getUint16(1, true);
-        const weightKg = parseFloat((weightRaw / 100).toFixed(2));
-        const userId = v.getUint8(13);
-
-        currentRecord.weight = weightKg;
-        currentRecord.userId = userId;
-
-        document.getElementById('currentResultCard').style.display = 'block';
-        document.getElementById('resWeight').innerText = weightKg;
-
-        commitRecordDelayed();
-      });
-
-      // 2. Trame Impédance
-      const bodyChar = await service.getCharacteristic(CHAR_BODY);
-      await bodyChar.startNotifications();
-      bodyChar.addEventListener('characteristicvaluechanged', (e) => {
-        const v = e.target.value;
-        const kcal = v.getUint16(6, true);
-        const fat = parseFloat(((v.getUint16(8, true) & 0x0FFF) / 10).toFixed(1));
-        const water = parseFloat(((v.getUint16(10, true) & 0x0FFF) / 10).toFixed(1));
-        const muscle = parseFloat(((v.getUint16(12, true) & 0x0FFF) / 10).toFixed(1));
-        const bone = parseFloat(((v.getUint16(14, true) & 0x0FFF) / 10).toFixed(1));
-
-        currentRecord.fat = fat;
-        currentRecord.water = water;
-        currentRecord.muscle = muscle;
-        currentRecord.bone = bone;
-        currentRecord.kcal = kcal;
-
-        document.getElementById('resFat').innerText = fat;
-        document.getElementById('resWater').innerText = water;
-        document.getElementById('resMuscle').innerText = muscle;
-        document.getElementById('resBone').innerText = bone;
-        document.getElementById('resKcal').innerText = kcal;
-
-        commitRecordDelayed();
-      });
-
-      // 3. Handshake obligatoire (Magic Bytes Transtek/Medisana)
-      try {
-        const cmdChar = await service.getCharacteristic(CHAR_CMD);
-        await cmdChar.writeValue(new Uint8Array([0x02, 0x7b, 0x7b, 0xf6, 0x0d]));
-      } catch (err) {
-        console.warn("Handshake CMD optionnel :", err);
-      }
-
-      status.innerText = "Connecté ! Montez sur la balance pieds nus...";
-
-    } catch (err) {
-      status.innerText = "Erreur : " + err.message;
+    function showToast(msg, icon = "✨") {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastMessage").innerText = msg;
+      document.getElementById("toastIcon").innerText = icon;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3200);
     }
-  });
 
-  renderHistory();
-</script>
+    function loadSettings() {
+      try {
+        const s = localStorage.getItem(SETTINGS_KEY);
+        if (s) userSettings = { ...userSettings, ...JSON.parse(s) };
+      } catch (e) {}
+      document.getElementById("inputHeight").value = userSettings.heightCm;
+      document.getElementById("inputStartWeight").value = userSettings.startWeight;
+      document.getElementById("inputTargetWeight").value = userSettings.targetWeight;
+      document.getElementById("targetGoalStr").innerText = `${userSettings.targetWeight.toFixed(1).replace(".", ",")} kg`;
+      document.getElementById("goalStartStr").innerText = `Départ ${userSettings.startWeight.toFixed(1).replace(".", ",")} kg`;
+      document.getElementById("goalTargetStr").innerText = `Cible ${userSettings.targetWeight.toFixed(1).replace(".", ",")} kg`;
+    }
 
+    function saveSettings() {
+      userSettings.heightCm = parseFloat(document.getElementById("inputHeight").value) || 178;
+      userSettings.startWeight = parseFloat(document.getElementById("inputStartWeight").value) || 82.0;
+      userSettings.targetWeight = parseFloat(document.getElementById("inputTargetWeight").value) || 75.0;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+      loadSettings();
+      updateUI();
+    }
+
+    document.getElementById("inputHeight").addEventListener("change", saveSettings);
+    document.getElementById("inputStartWeight").addEventListener("change", saveSettings);
+    document.getElementById("inputTargetWeight").addEventListener("change", saveSettings);
+
+    function loadRecords() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        records = stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        records = [];
+      }
+    }
+
+    function saveRecord(entry) {
+      records.unshift(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      updateUI();
+    }
+
+    function calculateIMC(weight) {
+      if (!weight) return 0;
+      const hM = userSettings.heightCm / 100;
+      return (weight / (hM * hM)).toFixed(1);
+    }
+
+    function updateDateHeader() {
+      const now = new Date();
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      const formatted = now.toLocaleDateString('fr-FR', options);
+      document.getElementById("currentDateStr").innerText = formatted;
+    }
+
+    // Mise à jour de toute l'interface
+    function updateUI() {
+      updateDateHeader();
+
+      if (records.length === 0) {
+        // État vide propre
+        document.getElementById("heroWeightVal").innerText = "--,-";
+        document.getElementById("heroTimeStr").innerText = "Aucune pesée enregistrée";
+        document.getElementById("heroBadgeWrapper").style.display = "none";
+        document.getElementById("goalRemainingStr").innerText = "-- kg restants";
+        document.getElementById("goalProgressBar").style.width = "0%";
+        document.getElementById("goalPercentStr").innerText = "0 %";
+
+        document.getElementById("cardFatVal").innerHTML = `--<small style="font-size:14px; font-weight:600;">%</small>`;
+        document.getElementById("cardWaterVal").innerHTML = `--<small style="font-size:14px; font-weight:600;">%</small>`;
+        document.getElementById("cardMuscleVal").innerHTML = `--<small style="font-size:14px; font-weight:600;">%</small>`;
+        document.getElementById("cardBoneVal").innerHTML = `--<small style="font-size:14px; font-weight:600;">kg</small>`;
+
+        document.getElementById("chartCurrentWeight").innerHTML = `-- <small style="font-size:16px; font-weight:600;">kg</small>`;
+        document.getElementById("chartDeltaBadge").style.display = "none";
+        document.getElementById("statMin").innerText = "--";
+        document.getElementById("statMax").innerText = "--";
+        document.getElementById("statAvg").innerText = "--";
+        document.getElementById("statDiff").innerText = "--";
+        document.getElementById("trendRateStr").innerText = "En attente de pesées";
+        document.getElementById("trendEstStr").innerText = "Montez sur la balance pour démarrer le suivi.";
+
+        document.getElementById("bodyDateStr").innerText = "Aucune donnée";
+        document.getElementById("imcValueStr").innerText = "--";
+        document.getElementById("imcCategoryBadge").innerText = "--";
+        document.getElementById("imcCategoryBadge").className = "metric-badge neutral";
+        document.getElementById("imcCursor").style.left = "50%";
+
+        document.getElementById("corpsFatVal").innerHTML = `--<small style="font-size:14px;">%</small>`;
+        document.getElementById("corpsWaterVal").innerHTML = `--<small style="font-size:14px;">%</small>`;
+        document.getElementById("corpsMuscleVal").innerHTML = `--<small style="font-size:14px;">%</small>`;
+        document.getElementById("corpsBoneVal").innerHTML = `--<small style="font-size:14px;">kg</small>`;
+        document.getElementById("corpsBmrVal").innerText = `-- kcal`;
+        document.getElementById("corpsDailyVal").innerText = `-- kcal`;
+
+        document.getElementById("historyTotalBadge").innerText = "0 entrée";
+        document.getElementById("historyTableBody").innerHTML = `<tr><td colspan="5" class="empty-state">Aucune pesée enregistrée. Appuyez sur « Synchroniser la balance » pour débuter.</td></tr>`;
+
+        renderMiniSparkline([]);
+        renderEvolutionChart([]);
+        return;
+      }
+
+      const latest = records[0];
+      const previous = records.length > 1 ? records[1] : latest;
+      const latestDate = new Date(latest.timestamp);
+
+      // 1. Écran Accueil
+      document.getElementById("heroWeightVal").innerText = latest.weight.toFixed(1).replace(".", ",");
+      document.getElementById("heroTimeStr").innerText = `Aujourd'hui · ${latestDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+
+      if (records.length > 1) {
+        const delta = (previous.weight - latest.weight).toFixed(1);
+        const absDelta = Math.abs(delta).toFixed(1).replace(".", ",");
+        document.getElementById("heroDeltaVal").innerText = `${absDelta} kg`;
+        document.getElementById("heroBadgeWrapper").style.display = "inline-flex";
+        const arrow = document.getElementById("heroBadgeArrow");
+        if (delta >= 0) {
+          arrow.innerHTML = `<path d="M12 5v14M19 12l-7 7-7-7"/>`; // Perte
+        } else {
+          arrow.innerHTML = `<path d="M12 19V5M5 12l7-7 7 7"/>`; // Gain
+        }
+      } else {
+        document.getElementById("heroBadgeWrapper").style.display = "none";
+      }
+
+      // Progression vers objectif
+      const remaining = Math.max(0, (latest.weight - userSettings.targetWeight)).toFixed(1);
+      document.getElementById("goalRemainingStr").innerText = `${remaining.replace(".", ",")} kg restants`;
+      const totalSpan = userSettings.startWeight - userSettings.targetWeight;
+      const lostSoFar = userSettings.startWeight - latest.weight;
+      let pct = totalSpan > 0 ? Math.round((lostSoFar / totalSpan) * 100) : 0;
+      pct = Math.max(0, Math.min(100, pct));
+      document.getElementById("goalPercentStr").innerText = `${pct} %`;
+      document.getElementById("goalProgressBar").style.width = `${pct}%`;
+
+      // 2x2 Accueil
+      document.getElementById("cardFatVal").innerHTML = latest.fat ? `${latest.fat.toFixed(1).replace(".", ",")}<small style="font-size:14px; font-weight:600;">%</small>` : `--%`;
+      document.getElementById("cardWaterVal").innerHTML = latest.water ? `${latest.water.toFixed(1).replace(".", ",")}<small style="font-size:14px; font-weight:600;">%</small>` : `--%`;
+      document.getElementById("cardMuscleVal").innerHTML = latest.muscle ? `${latest.muscle.toFixed(1).replace(".", ",")}<small style="font-size:14px; font-weight:600;">%</small>` : `--%`;
+      document.getElementById("cardBoneVal").innerHTML = latest.bone ? `${latest.bone.toFixed(1).replace(".", ",")}<small style="font-size:14px; font-weight:600;">kg</small>` : `--kg`;
+
+      if (records.length > 1 && latest.fat && previous.fat) {
+        const fatDiff = (latest.fat - previous.fat).toFixed(1);
+        document.getElementById("cardFatBadge").innerText = `${fatDiff >= 0 ? '↑' : '↓'} ${Math.abs(fatDiff).replace('.', ',')}`;
+        document.getElementById("cardFatBadge").className = fatDiff > 0 ? 'metric-badge warning' : 'metric-badge';
+      }
+      if (records.length > 1 && latest.water && previous.water) {
+        const wDiff = (latest.water - previous.water).toFixed(1);
+        document.getElementById("cardWaterBadge").innerText = `${wDiff >= 0 ? '↑' : '↓'} ${Math.abs(wDiff).replace('.', ',')}`;
+      }
+      if (records.length > 1 && latest.muscle && previous.muscle) {
+        const mDiff = (latest.muscle - previous.muscle).toFixed(1);
+        document.getElementById("cardMuscleBadge").innerText = `${mDiff >= 0 ? '↑' : '↓'} ${Math.abs(mDiff).replace('.', ',')}`;
+      }
+
+      // Sparkline Accueil
+      renderMiniSparkline(records.slice(0, 10).reverse());
+
+      // 2. Écran Évolution
+      renderEvolutionSection();
+
+      // 3. Écran Corps
+      document.getElementById("bodyDateStr").innerText = `Aujourd'hui · ${latestDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+      const imc = parseFloat(calculateIMC(latest.weight));
+      document.getElementById("imcValueStr").innerText = imc.toFixed(1).replace(".", ",");
+
+      let imcLabel = "Normal";
+      let imcBadgeClass = "metric-badge";
+      if (imc < 18.5) { imcLabel = "Insuffisance"; imcBadgeClass = "metric-badge neutral"; }
+      else if (imc >= 25 && imc < 30) { imcLabel = "Surpoids"; imcBadgeClass = "metric-badge warning"; }
+      else if (imc >= 30) { imcLabel = "Obésité"; imcBadgeClass = "metric-badge warning"; }
+      document.getElementById("imcCategoryBadge").innerText = imcLabel;
+      document.getElementById("imcCategoryBadge").className = imcBadgeClass;
+
+      const imcSliderPct = Math.min(95, Math.max(5, ((imc - 16) / (32 - 16)) * 100));
+      document.getElementById("imcCursor").style.left = `${imcSliderPct}%`;
+
+      if (latest.fat) {
+        document.getElementById("corpsFatVal").innerHTML = `${latest.fat.toFixed(1).replace(".", ",")}<small style="font-size:14px;">%</small>`;
+        const fatPct = Math.min(100, (latest.fat / 35) * 100);
+        document.getElementById("corpsFatGaugeFill").style.width = `${fatPct}%`;
+        document.getElementById("corpsFatGaugeThumb").style.left = `${fatPct}%`;
+        document.getElementById("corpsFatBadge").innerText = latest.fat > 24 ? "Élevée" : "Normal";
+        document.getElementById("corpsFatBadge").className = latest.fat > 24 ? "metric-badge warning" : "metric-badge";
+        document.getElementById("corpsFatSub").innerText = `Mesuré via impédancemètre`;
+      }
+
+      if (latest.water) {
+        document.getElementById("corpsWaterVal").innerHTML = `${latest.water.toFixed(1).replace(".", ",")}<small style="font-size:14px;">%</small>`;
+        const waterPct = Math.min(100, (latest.water / 70) * 100);
+        document.getElementById("corpsWaterGaugeFill").style.width = `${waterPct}%`;
+        document.getElementById("corpsWaterGaugeThumb").style.left = `${waterPct}%`;
+        document.getElementById("corpsWaterBadge").innerText = "Normal";
+        document.getElementById("corpsWaterSub").innerText = `Hydratation optimale`;
+      }
+
+      if (latest.muscle) {
+        document.getElementById("corpsMuscleVal").innerHTML = `${latest.muscle.toFixed(1).replace(".", ",")}<small style="font-size:14px;">%</small>`;
+        const musclePct = Math.min(100, (latest.muscle / 55) * 100);
+        document.getElementById("corpsMuscleGaugeFill").style.width = `${musclePct}%`;
+        document.getElementById("corpsMuscleGaugeThumb").style.left = `${musclePct}%`;
+        document.getElementById("corpsMuscleBadge").innerText = "Normal";
+        document.getElementById("corpsMuscleSub").innerText = `Masse squelettique active`;
+      }
+
+      if (latest.bone) {
+        document.getElementById("corpsBoneVal").innerHTML = `${latest.bone.toFixed(1).replace(".", ",")}<small style="font-size:14px;">kg</small>`;
+        const bonePct = Math.min(100, (latest.bone / 5) * 100);
+        document.getElementById("corpsBoneGaugeFill").style.width = `${bonePct}%`;
+        document.getElementById("corpsBoneGaugeThumb").style.left = `${bonePct}%`;
+        document.getElementById("corpsBoneBadge").innerText = "Normal";
+        document.getElementById("corpsBoneSub").innerText = `Minéral osseux`;
+      }
+
+      const bmrVal = latest.bmr || Math.round(10 * latest.weight + 6.25 * userSettings.heightCm - 5 * 20 + 5);
+      document.getElementById("corpsBmrVal").innerText = `${bmrVal.toLocaleString('fr-FR')} kcal`;
+      document.getElementById("corpsDailyVal").innerText = `${Math.round(bmrVal * 1.375).toLocaleString('fr-FR')} kcal`;
+
+      // 4. Écran Historique
+      document.getElementById("historyTotalBadge").innerText = `${records.length} ${records.length > 1 ? 'entrées' : 'entrée'}`;
+      const tbody = document.getElementById("historyTableBody");
+      tbody.innerHTML = "";
+
+      records.forEach(r => {
+        const tr = document.createElement("tr");
+        const d = new Date(r.timestamp);
+        const dateFormatted = `${d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} · ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+        tr.innerHTML = `
+          <td>${dateFormatted}</td>
+          <td><strong>${r.weight ? r.weight.toFixed(1) : '--'} kg</strong></td>
+          <td>${r.fat ? r.fat.toFixed(1) + '%' : '--'}</td>
+          <td>${r.muscle ? r.muscle.toFixed(1) + '%' : '--'}</td>
+          <td>${r.water ? r.water.toFixed(1) + '%' : '--'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Mini Wave Sparkline (Accueil)
+    function renderMiniSparkline(data) {
+      const svg = document.getElementById("homeMiniSvg");
+      if (!data || data.length < 2) {
+        svg.innerHTML = `
+          <line x1="0" y1="30" x2="320" y2="30" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.4"/>
+        `;
+        return;
+      }
+
+      const weights = data.map(d => d.weight);
+      const minW = Math.min(...weights) - 0.2;
+      const maxW = Math.max(...weights) + 0.2;
+      const span = maxW - minW || 1;
+
+      const points = data.map((d, i) => {
+        const x = (i / (data.length - 1)) * 320;
+        const y = 46 - ((d.weight - minW) / span) * 36;
+        return { x, y };
+      });
+
+      let dPath = `M ${points[0].x},${points[0].y}`;
+      for (let i = 0; i < points.length - 1; i++) {
+        const cx = (points[i].x + points[i + 1].x) / 2;
+        dPath += ` C ${cx},${points[i].y} ${cx},${points[i + 1].y} ${points[i + 1].x},${points[i + 1].y}`;
+      }
+
+      const last = points[points.length - 1];
+      const areaPath = `${dPath} L 320,60 L 0,60 Z`;
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="${areaPath}" fill="url(#waveGradient)" />
+        <path d="${dPath}" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="${last.x}" cy="${last.y}" r="3.5" fill="#ffffff" />
+      `;
+    }
+
+    // Évolution Data Filtering
+    function getFilteredRecords() {
+      if (!records.length) return [];
+      const now = new Date();
+      let cutoff = new Date(0);
+
+      if (currentRange === "7d") cutoff = new Date(now.getTime() - 7 * 86400000);
+      else if (currentRange === "30d") cutoff = new Date(now.getTime() - 30 * 86400000);
+      else if (currentRange === "90d") cutoff = new Date(now.getTime() - 90 * 86400000);
+      else if (currentRange === "365d") cutoff = new Date(now.getTime() - 365 * 86400000);
+
+      const filtered = records.filter(r => new Date(r.timestamp) >= cutoff);
+      return filtered.slice().reverse(); // Chronological order
+    }
+
+    function renderEvolutionSection() {
+      const data = getFilteredRecords();
+      const metricNames = {
+        weight: "Poids",
+        fat: "Graisse",
+        water: "Eau",
+        muscle: "Muscle",
+        bone: "Os",
+        imc: "IMC"
+      };
+      const units = {
+        weight: "kg",
+        fat: "%",
+        water: "%",
+        muscle: "%",
+        bone: "kg",
+        imc: ""
+      };
+
+      const rangeLabel = currentRange === "7d" ? "7 derniers jours" : currentRange === "30d" ? "30 derniers jours" : currentRange === "90d" ? "3 derniers mois" : currentRange === "365d" ? "Année passée" : "Tout l'historique";
+      document.getElementById("chartRangeSubtitle").innerText = `${metricNames[currentMetric]} · ${rangeLabel}`;
+
+      if (!data.length) {
+        renderEvolutionChart([]);
+        return;
+      }
+
+      const values = data.map(d => {
+        if (currentMetric === "weight") return d.weight;
+        if (currentMetric === "fat") return d.fat || 0;
+        if (currentMetric === "water") return d.water || 0;
+        if (currentMetric === "muscle") return d.muscle || 0;
+        if (currentMetric === "bone") return d.bone || 0;
+        if (currentMetric === "imc") return parseFloat(calculateIMC(d.weight)) || 0;
+        return d.weight;
+      });
+
+      const currentVal = values[values.length - 1];
+      document.getElementById("chartCurrentWeight").innerHTML = `${currentVal.toFixed(1).replace(".", ",")} <small style="font-size:16px; font-weight:600;">${units[currentMetric]}</small>`;
+
+      if (values.length > 1) {
+        const firstVal = values[0];
+        const diff = (currentVal - firstVal).toFixed(1);
+        const badge = document.getElementById("chartDeltaBadge");
+        badge.style.display = "inline-flex";
+        badge.innerText = `${diff <= 0 ? '↓' : '↑'} ${Math.abs(diff).replace('.', ',')} ${units[currentMetric]}`;
+        badge.style.background = diff <= 0 ? "#dcfce7" : "#fee2e2";
+        badge.style.color = diff <= 0 ? "#15803d" : "#b91c1c";
+      } else {
+        document.getElementById("chartDeltaBadge").style.display = "none";
+      }
+
+      // Stats 4 pilules
+      const minV = Math.min(...values).toFixed(1).replace(".", ",");
+      const maxV = Math.max(...values).toFixed(1).replace(".", ",");
+      const avgV = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1).replace(".", ",");
+      const diffV = (currentVal - values[0]).toFixed(1);
+
+      document.getElementById("statMin").innerText = minV;
+      document.getElementById("statMax").innerText = maxV;
+      document.getElementById("statAvg").innerText = avgV;
+      const diffEl = document.getElementById("statDiff");
+      diffEl.innerText = `${diffV > 0 ? '+' : ''}${diffV.replace('.', ',')}`;
+      diffEl.className = diffV <= 0 ? "val green" : "val red";
+
+      // Prédiction tendance hebdomadaire
+      if (data.length >= 2 && currentMetric === "weight") {
+        const firstT = new Date(data[0].timestamp).getTime();
+        const lastT = new Date(data[data.length - 1].timestamp).getTime();
+        const days = Math.max(1, (lastT - firstT) / 86400000);
+        const totalLost = data[0].weight - data[data.length - 1].weight;
+        const lostPerWeek = (totalLost / days) * 7;
+
+        if (lostPerWeek > 0) {
+          document.getElementById("trendRateStr").innerText = `Tendance : -${lostPerWeek.toFixed(1).replace('.', ',')} kg par semaine`;
+          const remainingKg = Math.max(0, data[data.length - 1].weight - userSettings.targetWeight);
+          const weeksNeeded = remainingKg / lostPerWeek;
+          const targetDate = new Date(Date.now() + weeksNeeded * 7 * 86400000);
+          document.getElementById("trendEstStr").innerText = `Objectif de ${userSettings.targetWeight} kg estimé vers le ${targetDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}.`;
+        } else {
+          document.getElementById("trendRateStr").innerText = `Tendance : Stable ou hausse (+${Math.abs(lostPerWeek).toFixed(1).replace('.', ',')} kg/sem)`;
+          document.getElementById("trendEstStr").innerText = `Conservez votre rythme pour amorcer la perte de poids.`;
+        }
+      }
+
+      renderEvolutionChart(data, values, units[currentMetric]);
+    }
+
+    // Graphique SVG interactif fidèle au mockup
+    function renderEvolutionChart(data, values, unit) {
+      const svg = document.getElementById("mainEvolutionSvg");
+      if (!data || data.length === 0) {
+        svg.innerHTML = `
+          <line x1="30" y1="30" x2="330" y2="30" stroke="#f1f5f9" stroke-width="1"/>
+          <line x1="30" y1="75" x2="330" y2="75" stroke="#f1f5f9" stroke-width="1"/>
+          <line x1="30" y1="120" x2="330" y2="120" stroke="#f1f5f9" stroke-width="1"/>
+          <text x="180" y="80" fill="#94a3b8" font-size="12" font-weight="600" text-anchor="middle">Aucune donnée sur cette période</text>
+        `;
+        return;
+      }
+
+      const paddingLeft = 32;
+      const paddingRight = 14;
+      const chartWidth = 340 - paddingLeft - paddingRight;
+      const paddingTop = 20;
+      const chartHeight = 135;
+
+      const minV = Math.floor(Math.min(...values, (currentMetric === "weight" ? userSettings.targetWeight : 999)) - 1);
+      const maxV = Math.ceil(Math.max(...values) + 1);
+      const vSpan = maxV - minV || 1;
+
+      const steps = [maxV, Math.round(maxV - vSpan * 0.33), Math.round(maxV - vSpan * 0.66), minV];
+      let gridSvg = "";
+      steps.forEach(s => {
+        const y = paddingTop + chartHeight - ((s - minV) / vSpan) * chartHeight;
+        gridSvg += `
+          <line x1="${paddingLeft}" y1="${y}" x2="330" y2="${y}" stroke="#f1f5f9" stroke-width="1"/>
+          <text x="12" y="${y + 3}" fill="#94a3b8" font-size="9" font-weight="600">${s}</text>
+        `;
+      });
+
+      let targetSvg = "";
+      if (currentMetric === "weight" && userSettings.targetWeight >= minV && userSettings.targetWeight <= maxV) {
+        const targetY = paddingTop + chartHeight - ((userSettings.targetWeight - minV) / vSpan) * chartHeight;
+        targetSvg = `
+          <line x1="${paddingLeft}" y1="${targetY}" x2="330" y2="${targetY}" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <text x="268" y="${targetY - 4}" fill="#16a34a" font-size="9" font-weight="700">Objectif ${userSettings.targetWeight.toFixed(1).replace('.', ',')}</text>
+        `;
+      }
+
+      const points = data.map((d, i) => {
+        const x = data.length === 1 ? paddingLeft + chartWidth / 2 : paddingLeft + (i / (data.length - 1)) * chartWidth;
+        const val = values[i];
+        const y = paddingTop + chartHeight - ((val - minV) / vSpan) * chartHeight;
+        return { x, y, val, date: new Date(d.timestamp), index: i };
+      });
+
+      let curvePath = `M ${points[0].x},${points[0].y}`;
+      if (points.length > 1) {
+        for (let i = 0; i < points.length - 1; i++) {
+          const cx = (points[i].x + points[i + 1].x) / 2;
+          curvePath += ` C ${cx},${points[i].y} ${cx},${points[i + 1].y} ${points[i + 1].x},${points[i + 1].y}`;
+        }
+      }
+      const areaPath = `${curvePath} L ${points[points.length - 1].x},${paddingTop + chartHeight} L ${points[0].x},${paddingTop + chartHeight} Z`;
+
+      let activeIdx = activeHoverPointIndex !== null ? activeHoverPointIndex : Math.max(0, points.length - 1);
+      if (activeIdx >= points.length) activeIdx = points.length - 1;
+      const activePoint = points[activeIdx];
+
+      let circlesSvg = "";
+      points.forEach((p, idx) => {
+        const isSelected = idx === activeIdx;
+        circlesSvg += `
+          <circle cx="${p.x}" cy="${p.y}" r="${isSelected ? 4.5 : 3}" fill="${isSelected ? '#111827' : '#6366f1'}" stroke="#ffffff" stroke-width="2" style="cursor:pointer;" onclick="selectChartPoint(${idx})"/>
+          <circle cx="${p.x}" cy="${p.y}" r="14" fill="transparent" style="cursor:pointer;" onclick="selectChartPoint(${idx})"/>
+        `;
+      });
+
+      let tooltipSvg = "";
+      if (activePoint) {
+        const ttWidth = 72;
+        const ttHeight = 32;
+        let ttX = activePoint.x - ttWidth / 2;
+        ttX = Math.max(paddingLeft, Math.min(340 - paddingRight - ttWidth, ttX));
+        const ttY = Math.max(4, activePoint.y - ttHeight - 10);
+        const dateStr = activePoint.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+        tooltipSvg = `
+          <line x1="${activePoint.x}" y1="${activePoint.y}" x2="${activePoint.x}" y2="${paddingTop + chartHeight}" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <rect x="${ttX}" y="${ttY}" width="${ttWidth}" height="${ttHeight}" rx="6" fill="#111827"/>
+          <text x="${ttX + ttWidth / 2}" y="${ttY + 14}" fill="#ffffff" font-size="9" font-weight="700" text-anchor="middle">${activePoint.val.toFixed(1).replace('.', ',')} ${unit}</text>
+          <text x="${ttX + ttWidth / 2}" y="${ttY + 25}" fill="#94a3b8" font-size="8" font-weight="500" text-anchor="middle">${dateStr}</text>
+        `;
+      }
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6366f1" stop-opacity="0.24"/>
+            <stop offset="100%" stop-color="#6366f1" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        ${gridSvg}
+        ${targetSvg}
+        <path d="${areaPath}" fill="url(#areaGrad)"/>
+        <path d="${curvePath}" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/>
+        ${tooltipSvg}
+        ${circlesSvg}
+      `;
+    }
+
+    window.selectChartPoint = function(idx) {
+      activeHoverPointIndex = idx;
+      renderEvolutionSection();
+    };
+
+    // Filter Listeners
+    document.querySelectorAll("#timeFilterRow .pill-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#timeFilterRow .pill-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentRange = btn.getAttribute("data-range");
+        activeHoverPointIndex = null;
+        renderEvolutionSection();
+      });
+    });
+
+    document.querySelectorAll("#metricFilterRow .metric-pill-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#metricFilterRow .metric-pill-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentMetric = btn.getAttribute("data-metric");
+        activeHoverPointIndex = null;
+        renderEvolutionSection();
+      });
+    });
+
+    // Tab Bar Navigation
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+        btn.classList.add("active");
+        const tabId = btn.getAttribute("data-tab");
+        const target = document.getElementById(`tab-${tabId}`);
+        if (target) target.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
+    // BLE Connect Medisana BS 444
+    document.getElementById("btnSync").addEventListener("click", async () => {
+      if (!navigator.bluetooth) {
+        showToast("Web Bluetooth non supporté (utilisez Bluefy sur iOS)", "⚠️");
+        return;
+      }
+
+      showToast("Recherche de la balance...", "🔍");
+
+      try {
+        currentWeighIn = {
+          id: (crypto.randomUUID ? crypto.randomUUID() : 'rec_' + Date.now()),
+          timestamp: new Date().toISOString(),
+          weight: null,
+          fat: null,
+          water: null,
+          muscle: null,
+          bone: null,
+          bmr: null,
+          userId: 1
+        };
+
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [
+            { namePrefix: '02' },
+            { namePrefix: 'BS44' },
+            { namePrefix: 'Medisana' },
+            { services: [BLE_SERVICE_UUID] }
+          ],
+          optionalServices: [BLE_SERVICE_UUID]
+        });
+
+        showToast("Connexion à la balance...", "🔗");
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(BLE_SERVICE_UUID);
+
+        // 1. Écoute Poids
+        const weightChar = await service.getCharacteristic(BLE_CHAR_WEIGHT);
+        await weightChar.startNotifications();
+        weightChar.addEventListener('characteristicvaluechanged', (e) => {
+          const v = e.target.value;
+          const weightRaw = v.getUint16(1, true);
+          currentWeighIn.weight = parseFloat((weightRaw / 100).toFixed(2));
+          currentWeighIn.userId = v.getUint8(13);
+          scheduleCommit();
+        });
+
+        // 2. Écoute Impédance
+        const bodyChar = await service.getCharacteristic(BLE_CHAR_BODY);
+        await bodyChar.startNotifications();
+        bodyChar.addEventListener('characteristicvaluechanged', (e) => {
+          const v = e.target.value;
+          currentWeighIn.bmr = v.getUint16(6, true);
+          currentWeighIn.fat = parseFloat(((v.getUint16(8, true) & 0x0FFF) / 10).toFixed(1));
+          currentWeighIn.water = parseFloat(((v.getUint16(10, true) & 0x0FFF) / 10).toFixed(1));
+          currentWeighIn.muscle = parseFloat(((v.getUint16(12, true) & 0x0FFF) / 10).toFixed(1));
+          currentWeighIn.bone = parseFloat(((v.getUint16(14, true) & 0x0FFF) / 10).toFixed(1));
+          scheduleCommit();
+        });
+
+        // 3. Handshake Transtek/Medisana
+        try {
+          const cmdChar = await service.getCharacteristic(BLE_CHAR_CMD);
+          await cmdChar.writeValue(new Uint8Array([0x02, 0x7b, 0x7b, 0xf6, 0x0d]));
+        } catch (cmdErr) {
+          console.warn("Handshake CMD optionnel :", cmdErr);
+        }
+
+        showToast("Montez sur la balance pieds nus", "🦶");
+      } catch (err) {
+        showToast("Erreur BLE : " + err.message, "❌");
+      }
+    });
+
+    function scheduleCommit() {
+      clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = setTimeout(() => {
+        if (currentWeighIn && currentWeighIn.weight) {
+          saveRecord(currentWeighIn);
+          showToast(`Pesée enregistrée : ${currentWeighIn.weight} kg`, "✅");
+          currentWeighIn = null;
+        }
+      }, 2000);
+    }
+
+    // Export CSV
+    document.getElementById("btnExportCSV").addEventListener("click", () => {
+      if (!records.length) {
+        showToast("Aucune pesée à exporter", "ℹ️");
+        return;
+      }
+
+      const headers = ["ID", "Date_ISO", "Date_Lisible", "Poids_kg", "Masse_Grasse_pct", "Eau_pct", "Muscle_pct", "Os_kg", "BMR_kcal", "Utilisateur"];
+      const rows = records.map(r => {
+        const d = new Date(r.timestamp);
+        return [
+          r.id,
+          r.timestamp,
+          `"${d.toLocaleString('fr-FR')}"`,
+          r.weight ?? "",
+          r.fat ?? "",
+          r.water ?? "",
+          r.muscle ?? "",
+          r.bone ?? "",
+          r.bmr ?? "",
+          r.userId ?? 1
+        ].join(";");
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\r\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `medisana_bs444_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Fichier CSV téléchargé !", "📥");
+    });
+
+    // Reset Data
+    document.getElementById("btnClearStorage").addEventListener("click", () => {
+      if (confirm("Voulez-vous supprimer toutes les pesées enregistrées ?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        records = [];
+        updateUI();
+        showToast("Historique réinitialisé", "🔄");
+      }
+    });
+
+    // Init
+    loadSettings();
+    loadRecords();
+    updateUI();
+  </script>
 </body>
 </html>
