@@ -62,6 +62,20 @@ small,.sub{font-size:12px;font-weight:500;color:var(--t2)}
 .tab.on{background:var(--acs);color:var(--ac);font-weight:600}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 10px);transform:translate(-50%,-80px);background:var(--t1);color:var(--sf);padding:10px 16px;border-radius:16px;font-size:14px;font-weight:600;transition:transform .3s;z-index:9;max-width:90%;text-align:center}
 .toast.on{transform:translate(-50%,0)}
+.seg{display:flex;gap:2px;padding:4px;background:var(--sf);border-radius:24px}.seg button{flex:1;padding:9px 0;border-radius:20px;font-size:14px;font-weight:500;color:var(--t2)}.seg .on{background:var(--ac);color:#fff;font-weight:600}
+.chips{display:flex;justify-content:space-between;gap:6px}.chips button{padding:8px 10px;border-radius:18px;background:var(--sf);font-size:13px;font-weight:600;color:var(--t2)}.chips .on{background:var(--t1);color:var(--sf)}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.tile{background:var(--sf);border-radius:20px;padding:12px}.tile b{display:block;font-size:19px;letter-spacing:-.02em}
+.tag.g{background:var(--gs);color:var(--g)}.tag.o{background:var(--os);color:var(--o)}
+.bar{position:relative;height:16px}.bar i{position:absolute;top:5px;height:6px;border-radius:3px}.bar u{position:absolute;top:1px;width:14px;height:14px;margin-left:-7px;border-radius:50%;border:3px solid var(--sf);box-sizing:content-box;transform:translate(-3px,-3px)}
+.bmi b{font-size:38px;letter-spacing:-.04em}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:8}.sheet.on{display:flex}
+.sheet>div{width:100%;max-width:430px;margin:auto;background:var(--sf);border-radius:28px 28px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom) + 20px);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto}
+.cells{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.cells div{background:var(--sf2);border-radius:16px;padding:10px}.cells b{display:block;font-size:17px}
+textarea,input[type=datetime-local]{width:100%;border:1px solid var(--bd);border-radius:14px;padding:10px;background:var(--sf2);color:var(--t1);font:inherit}
+.btn{height:48px;border-radius:24px;font-weight:600;font-size:16px}.btn.p{background:var(--ac);color:#fff}.btn.d{color:#EF4444}
+.rw{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--bd);cursor:pointer}.rw:first-of-type{border:0}.rw small{display:block}.rw>span:last-child{color:var(--ac);font-weight:600;font-size:14px}
+.av{width:56px;height:56px;border-radius:50%;background:var(--acs);color:var(--ac);display:grid;place-items:center;font-size:24px;font-weight:700}
 </style>
 </head>
 <body>
@@ -81,30 +95,41 @@ small,.sub{font-size:12px;font-weight:500;color:var(--t2)}
   </div>
   <div class="grid" id="mini"></div>
   <button class="sync" id="sync"><span data-i="refresh" data-s="18" data-w="2.3"></span><span>Synchroniser la balance</span></button>
-  <p class="st" id="st">Monte sur la balance pieds nus, puis appuie sur le bouton.</p>
+  <p class="st" id="st">Pèse-toi d'abord, puis appuie sur « Synchroniser la balance ».</p>
 </section>
 
 <section class="page" id="p-evo">
   <div class="hd"><small>Suivi détaillé</small><h1>Évolution</h1></div>
-  <div class="card empty">Le graphique arrive à l'étape suivante.</div>
+  <div class="seg" id="ep"></div><div class="chips" id="em"></div>
+  <div class="card"><div class="row"><div><small id="el"></small><div class="big"><b id="ev" style="font-size:34px"></b><u id="eu" style="font-size:16px;color:var(--t2)"></u></div></div><span class="tag" id="ed"></span></div><div class="chart" id="cv"></div></div>
+  <div class="tiles" id="et"></div><div class="card" id="ei" hidden></div>
 </section>
 
 <section class="page" id="p-body">
   <div class="hd"><small>Composition corporelle</small><h1>Corps</h1></div>
-  <div class="card empty">Les jauges arrivent à l'étape suivante.</div>
+  <div class="card bmi" id="bm"></div><div class="grid" id="bg"></div><div class="card" id="bk"></div><p class="st" id="bn"></p>
 </section>
 
 <section class="page" id="p-hist">
   <div class="row hd"><div><small>Toutes les pesées</small><h1>Historique</h1></div><button class="circle" id="exp" aria-label="Exporter en CSV" data-i="download"></button></div>
+  <div class="chips" id="hf" style="justify-content:flex-start;gap:8px"></div>
   <div id="hl"></div>
 </section>
 
 <section class="page" id="p-me">
   <div class="hd"><small>Votre espace personnel</small><h1>Profil</h1></div>
-  <div class="card empty">Le profil et les réglages arrivent à l'étape suivante.</div>
+  <div id="mc" style="display:flex;flex-direction:column;gap:12px"></div>
 </section>
 
 </div>
+<input type="file" id="imp" accept=".csv,text/csv" hidden>
+<div class="sheet" id="sheet"><div>
+  <div class="row"><div><small id="sh-d0"></small><div class="big"><b id="sh-w" style="font-size:34px"></b></div></div><button class="circle" id="sh-x" aria-label="Fermer">✕</button></div>
+  <div class="cells" id="sh-c"></div>
+  <small>Date et heure</small><input type="datetime-local" id="sh-d">
+  <small>Note</small><textarea id="sh-n" rows="2" placeholder="À jeun, après sport…"></textarea>
+  <button class="btn p" id="sh-s">Enregistrer</button><button class="btn d" id="sh-r">Supprimer cette pesée</button>
+</div></div>
 <nav class="tabs" id="tabs"></nav>
 <div class="toast" id="toast"></div>
 
@@ -218,33 +243,169 @@ $("#goal").onclick = () => {
   put(KS, { ...settings(), goal: n }); renderAll();
 };
 
+/* ---------- Outils communs ---------- */
+const setS = p => put(KS, { ...settings(), ...p });
+const MET = { weight: ["Poids", "kg", 0], fat: ["Graisse", "%", 0], water: ["Eau", "%", 1], muscle: ["Muscle", "%", 1], bone: ["Os", "kg", null], bmi: ["IMC", "", 0] };
+const val = (r, k) => { if (k !== "bmi") return r[k]; const h = settings().height; return r.weight && h ? r.weight / ((h / 100) ** 2) : null };
+const avg = a => a.reduce((s, x) => s + x, 0) / a.length;
+const dstr = t => new Date(t).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+const dlt = (d, good) => Math.abs(d) < .05 ? { c: "", t: "stable" } : { c: good === null ? "" : (d < 0) === (good === 0) ? "g" : "o", t: (d < 0 ? "−" : "+") + fm(Math.abs(d)) };
+function curve(P) { let d = "M" + P[0]; for (let i = 0; i < P.length - 1; i++) { const a = P[i - 1] || P[i], b = P[i], c = P[i + 1], e = P[i + 2] || c; d += ` C${b[0] + (c[0] - a[0]) / 6},${b[1] + (c[1] - a[1]) / 6} ${c[0] - (e[0] - b[0]) / 6},${c[1] - (e[1] - b[1]) / 6} ${c}` } return d }
+const bar = (min, max, zones, v, mk) => { const p = x => Math.max(0, Math.min(100, (x - min) / (max - min) * 100)); return `<div class="bar"><i style="left:0;width:100%;background:var(--sf2)"></i>${zones.map(([a, b, c, o]) => `<i style="left:${p(a)}%;width:${p(b) - p(a)}%;background:var(--${c});opacity:${o}"></i>`).join("")}<u style="left:${p(v)}%;background:${mk}"></u></div>` };
+
+/* ---------- Évolution ---------- */
+const evo = { p: "1M", m: "weight" }, PER = { "7J": 7, "1M": 30, "3M": 90, "1A": 365, "Tout": 1e5 };
+function renderEvo() {
+  const [lab, u, good] = MET[evo.m], s = settings(), now = Date.now();
+  $("#ep").innerHTML = Object.keys(PER).map(k => `<button data-k="${k}" class="${k === evo.p ? "on" : ""}">${k}</button>`).join("");
+  $("#em").innerHTML = Object.entries(MET).map(([k, m]) => `<button data-k="${k}" class="${k === evo.m ? "on" : ""}">${m[0]}</button>`).join("");
+  const P = records().reverse().filter(r => now - new Date(r.timestamp) <= PER[evo.p] * 864e5 && val(r, evo.m) != null).map(r => ({ t: +new Date(r.timestamp), v: val(r, evo.m) }));
+  $("#el").textContent = lab + " · " + (evo.p === "Tout" ? "tout l'historique" : evo.p); $("#eu").textContent = u;
+  const clear = m => { $("#cv").innerHTML = `<div class="empty">${m}</div>`; $("#ev").textContent = P.length ? fm(P[P.length - 1].v) : "--"; $("#ed").hidden = true; $("#et").innerHTML = ""; $("#ei").hidden = true };
+  if (evo.m === "bmi" && !s.height) return clear("Renseigne ta taille dans Profil pour calculer l'IMC.");
+  if (P.length < 2) return clear("Pas assez de pesées sur cette période.");
+  const T = P.map((_, i) => avg(P.slice(Math.max(0, i - 3), i + 4).map(p => p.v))), n = P.length - 1;
+  const goal = evo.m === "weight" ? s.goal : null;
+  const W = 330, H = 230, X0 = 34, X1 = W - 8, Y0 = 10, Y1 = H - 26;
+  let lo = Math.min(...P.map(p => p.v)), hi = Math.max(...P.map(p => p.v));
+  if (goal != null) { lo = Math.min(lo, goal); hi = Math.max(hi, goal) }
+  const pad = (hi - lo) * .12 || 1; lo -= pad; hi += pad;
+  const t0 = P[0].t, t1 = P[n].t, x = t => X0 + (t - t0) / ((t1 - t0) || 1) * (X1 - X0), y = v => Y0 + (hi - v) / (hi - lo) * (Y1 - Y0);
+  const TP = T.map((v, i) => [x(P[i].t), y(v)]), d = curve(TP);
+  let g = "";
+  for (let i = 0; i < 4; i++) { const v = hi - (hi - lo) * i / 3, yy = y(v); g += `<line x1="${X0 - 2}" x2="${X1 + 6}" y1="${yy}" y2="${yy}" stroke="var(--bd)"/><text x="0" y="${yy + 4}" font-size="11" fill="var(--t3)">${fm(v, hi - lo < 4 ? 1 : 0)}</text>` }
+  if (goal != null) g += `<line x1="${X0 - 2}" x2="${X1 + 6}" y1="${y(goal)}" y2="${y(goal)}" stroke="var(--g)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${X1 + 6}" y="${y(goal) - 5}" font-size="10.5" font-weight="600" fill="var(--g)" text-anchor="end">Objectif ${fm(goal)}</text>`;
+  const xl = [0, Math.floor(n / 2), n].filter((v, i, a) => a.indexOf(v) === i).map(i => `<text x="${Math.min(Math.max(x(P[i].t), 20), W - 20)}" y="${H - 6}" font-size="11" fill="var(--t3)" text-anchor="middle">${dstr(P[i].t)}</text>`).join("");
+  $("#cv").innerHTML = `<svg viewBox="0 0 ${W} ${H}"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--ac)" stop-opacity=".28"/><stop offset="1" stop-color="var(--ac)" stop-opacity="0"/></linearGradient></defs>${g}${P.map(p => `<circle cx="${x(p.t)}" cy="${y(p.v)}" r="2.5" fill="var(--ac)" opacity=".35"/>`).join("")}<path d="${d} L${TP[n][0]},${Y1} L${TP[0][0]},${Y1}Z" fill="url(#ga)"/><path d="${d}" fill="none" stroke="var(--ac)" stroke-width="3.5" stroke-linecap="round"/><g id="mk"><line stroke="var(--ac)" stroke-opacity=".4" stroke-width="1.5"/><circle r="6" fill="var(--sf)" stroke="var(--ac)" stroke-width="3.5"/><rect width="76" height="38" rx="11" fill="var(--t1)"/><text font-size="13" font-weight="700" fill="var(--sf)"></text><text font-size="10.5" fill="var(--sf)" opacity=".7"></text></g>${xl}</svg>`;
+  const mk = $("#mk"), mark = i => {
+    const px = x(P[i].t), py = TP[i][1], ln = mk.querySelector("line"), ci = mk.querySelector("circle"), rc = mk.querySelector("rect"), tx = mk.querySelectorAll("text"), bx = Math.min(Math.max(px - 38, 2), W - 78), by = Math.max(2, py - 52);
+    ln.setAttribute("x1", px); ln.setAttribute("x2", px); ln.setAttribute("y1", py); ln.setAttribute("y2", Y1); ci.setAttribute("cx", px); ci.setAttribute("cy", py);
+    rc.setAttribute("x", bx); rc.setAttribute("y", by); tx[0].setAttribute("x", bx + 10); tx[0].setAttribute("y", by + 16); tx[1].setAttribute("x", bx + 10); tx[1].setAttribute("y", by + 30);
+    tx[0].textContent = fm(P[i].v) + " " + u; tx[1].textContent = dstr(P[i].t);
+  };
+  mark(n);
+  const svg = $("#cv svg"), pick = e => { const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * W; let b = 0; P.forEach((p, i) => { if (Math.abs(x(p.t) - px) < Math.abs(x(P[b].t) - px)) b = i }); mark(b) };
+  svg.onpointerdown = svg.onpointermove = pick;
+  const first = P[0].v, last = P[n].v, dd = dlt(last - first, good);
+  $("#ev").textContent = fm(last); $("#ed").hidden = false; $("#ed").className = "tag " + dd.c; $("#ed").textContent = dd.t === "stable" ? "stable" : dd.t + " " + (u || "");
+  const vs = P.map(p => p.v), tl = (l, v, c) => `<div class="tile"><small>${l}</small><b${c ? ` style="color:var(--${c})"` : ""}>${v}</b></div>`;
+  $("#et").innerHTML = tl("Min", fm(Math.min(...vs))) + tl("Max", fm(Math.max(...vs))) + tl("Moyenne", fm(avg(vs))) + tl("Écart", dd.t === "stable" ? "0,0" : dd.t, dd.c);
+  const ei = $("#ei"), span = (t1 - t0) / 864e5;
+  if (evo.m === "weight" && span >= 3) {
+    const wk = (T[n] - T[0]) / span * 7, rem = last - s.goal;
+    let eta = ""; if (wk && rem * wk < 0 && Math.abs(rem / wk) < 104) eta = `Objectif de ${fm(s.goal)} kg estimé vers le ${new Date(now + Math.abs(rem / wk) * 7 * 864e5).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
+    ei.hidden = false; ei.innerHTML = `<b>Tendance : ${wk < 0 ? "−" : "+"}${fm(Math.abs(wk))} kg par semaine</b>${eta ? `<small>${eta}</small>` : ""}`;
+  } else ei.hidden = true;
+}
+$("#ep").onclick = e => { const k = e.target.dataset.k; if (k) { evo.p = k; renderEvo() } };
+$("#em").onclick = e => { const k = e.target.dataset.k; if (k) { evo.m = k; renderEvo() } };
+
+/* ---------- Corps ---------- */
+const REF = { m: { fat: [5, 40, 8, 20], water: [40, 70, 50, 65], muscle: [25, 55, 36, 50], bone: [1.5, 5, 2.6, 3.8] }, f: { fat: [5, 45, 21, 33], water: [35, 65, 45, 60], muscle: [20, 50, 28, 42], bone: [1, 4, 1.9, 3.1] } };
+function renderBody() {
+  const R = records(), cur = R[0], s = settings(), ref = REF[s.sex === "f" ? "f" : "m"];
+  const bmi = cur && s.height ? cur.weight / ((s.height / 100) ** 2) : null;
+  const st = bmi == null ? null : bmi < 18.5 ? ["Insuffisant", "o"] : bmi < 25 ? ["Normal", "g"] : bmi < 30 ? ["Surpoids", "o"] : ["Obésité", "o"];
+  $("#bm").innerHTML = `<div class="row"><div><small>Indice de masse corporelle</small><div class="big"><b>${bmi == null ? "--" : fm(bmi)}</b><u style="font-size:14px;color:var(--t2)">kg/m²</u></div></div>${st ? `<span class="tag ${st[1]}">${st[0]}</span>` : ""}</div>` +
+    (bmi == null ? `<small>${cur ? "Renseigne ta taille dans Profil." : "Aucune pesée pour l'instant."}</small>` : bar(15, 35, [[15, 18.5, "o", .45], [18.5, 25, "g", 1], [25, 30, "o", .45], [30, 35, "o", 1]], Math.max(15, Math.min(35, bmi)), "var(--t1)") + `<div class="row" style="font-size:11px;color:var(--t3)"><span>15</span><span>18,5</span><span>25</span><span>30</span><span>35</span></div>`);
+  $("#bg").innerHTML = MINI.map(([k, i, l, u]) => {
+    const v = cur ? cur[k] : null, [mn, mx, lo, hi] = ref[k];
+    const status = v == null ? null : v < lo ? ["Bas", "o"] : v > hi ? [k === "fat" ? "Élevée" : "Haut", k === "fat" ? "o" : "g"] : ["Normal", "g"];
+    const old = cur && R.filter(r => new Date(cur.timestamp) - new Date(r.timestamp) <= 30 * 864e5 && r[k] != null).pop();
+    const dd = v != null && old && old !== cur ? dlt(v - old[k], k === "fat" ? 0 : k === "bone" ? null : 1) : null;
+    return `<div class="mini"><div class="row"><div class="ib" style="width:30px;height:30px">${ic(i, 16)}</div>${status ? `<span class="tag ${status[1]}" style="padding:3px 8px;font-size:11px">${status[0]}</span>` : ""}</div><div class="top" style="display:block">${l}</div><b>${fm(v)}<small>${u}</small></b>${v == null ? "" : bar(mn, mx, [[lo, hi, "g", .4]], v, `var(--${status[1] === "g" ? "g" : "o"})`)}<span class="dl ${dd ? dd.c || "n" : "n"}" style="font-weight:500">${dd ? dd.t + " sur 30 j" : "—"}</span></div>`;
+  }).join("");
+  const kc = cur && cur.kcal, nb = n => n.toLocaleString("fr-FR");
+  $("#bk").innerHTML = `<div class="row"><div><small>Métabolisme de base</small><b style="font-size:19px;display:block">${kc ? nb(kc) : "--"} <small>kcal</small></b></div><div style="text-align:right"><small>Besoin quotidien (estimé)</small><b style="font-size:19px;display:block">${kc ? nb(Math.round(kc * 1.4 / 10) * 10) : "--"} <small>kcal</small></b></div></div>`;
+  $("#bn").textContent = !s.sex || !s.height ? "Renseigne ta taille et ton sexe dans Profil pour des repères plus justes." : "";
+}
+
 /* ---------- Historique ---------- */
+let hf = "all", sid = null;
+const toLocal = iso => { const d = new Date(iso); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16) };
 function renderHist() {
-  const R = records(), box = $("#hl");
-  if (!R.length) { box.innerHTML = `<div class="card empty">Aucune pesée pour l'instant.<br>Synchronise ta balance depuis l'accueil.</div>`; return }
+  $("#hf").innerHTML = [["all", "Tout"], ["month", "Ce mois"], ["notes", "Notes"]].map(([k, l]) => `<button data-k="${k}" class="${k === hf ? "on" : ""}">${l}</button>`).join("");
+  const all = records(), box = $("#hl"), now = new Date();
+  if (!all.length) { box.innerHTML = `<div class="card empty">Aucune pesée pour l'instant.<br>Synchronise ta balance depuis l'accueil.</div>`; return }
   const groups = {};
-  R.forEach((r, i) => { const k = cap(new Date(r.timestamp).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })); (groups[k] = groups[k] || []).push([r, R[i + 1]]) });
+  all.forEach((r, i) => { const d = new Date(r.timestamp); if (hf === "month" && (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear())) return; if (hf === "notes" && !r.note) return; const k = cap(d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })); (groups[k] = groups[k] || []).push([r, all[i + 1]]) });
+  if (!Object.keys(groups).length) { box.innerHTML = `<div class="card empty">Aucune pesée ne correspond à ce filtre.</div>`; return }
   box.innerHTML = Object.entries(groups).map(([m, rows]) => `<div class="sect" style="margin-top:12px"><div>${m}</div><span>${rows.length} pesée${rows.length > 1 ? "s" : ""}</span></div><div class="list" style="margin-top:12px">${rows.map(([r, p]) => {
     const d = new Date(r.timestamp), t = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     let ch = "";
     if (p) { const x = r.weight - p.weight; ch = Math.abs(x) < .05 ? `<span class="dc">0,0</span>` : `<span class="dc ${x < 0 ? "g" : "o"}">${ic(x < 0 ? "down" : "up", 11, 2.8)}${fm(Math.abs(x))}</span>` }
-    return `<div class="item"><div class="dt">${d.getDate()}<small>${d.toLocaleDateString("fr-FR", { weekday: "short" }).toUpperCase()}</small></div><div><b>${fm(r.weight)}</b> <small>kg</small><span class="sub">${t}${r.fat != null ? " · " + fm(r.fat) + " % graisse" : ""}</span></div>${ch}</div>`;
+    return `<div class="item" data-id="${r.id}" style="cursor:pointer"><div class="dt">${d.getDate()}<small>${d.toLocaleDateString("fr-FR", { weekday: "short" }).toUpperCase()}</small></div><div><b>${fm(r.weight)}</b> <small>kg</small><span class="sub"${r.note ? ' style="color:var(--ac)"' : ""}>${t} · ${r.note ? r.note.replace(/</g, "&lt;") : r.fat != null ? fm(r.fat) + " % graisse" : "—"}</span></div>${ch}</div>`;
   }).join("")}</div>`).join("");
 }
+$("#hf").onclick = e => { const k = e.target.dataset.k; if (k) { hf = k; renderHist() } };
+$("#hl").onclick = e => { const it = e.target.closest(".item"); if (it) openSheet(it.dataset.id) };
+function openSheet(id) {
+  const r = records().find(x => x.id === id); if (!r) return; sid = id;
+  const h = settings().height, bmi = h ? r.weight / ((h / 100) ** 2) : null, c = (l, v) => `<div><small>${l}</small><b>${v}</b></div>`;
+  $("#sh-d0").textContent = new Date(r.timestamp).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  $("#sh-w").textContent = fm(r.weight) + " kg";
+  $("#sh-c").innerHTML = c("Graisse", fm(r.fat) + " %") + c("Eau", fm(r.water) + " %") + c("Muscle", fm(r.muscle) + " %") + c("Os", fm(r.bone) + " kg") + c("IMC", bmi ? fm(bmi) : "--") + c("Calories", r.kcal ?? "--");
+  $("#sh-n").value = r.note || ""; $("#sh-d").value = toLocal(r.timestamp); $("#sheet").classList.add("on");
+}
+const closeSheet = () => $("#sheet").classList.remove("on");
+$("#sh-x").onclick = closeSheet; $("#sheet").onclick = e => { if (e.target.id === "sheet") closeSheet() };
+$("#sh-s").onclick = () => {
+  const list = records(), r = list.find(x => x.id === sid), d = new Date($("#sh-d").value);
+  if (!r) return; if (isNaN(d)) return toast("Date invalide");
+  r.note = $("#sh-n").value.trim() || undefined; r.timestamp = d.toISOString(); put(K, list); closeSheet(); renderAll(); toast("Pesée mise à jour");
+};
+$("#sh-r").onclick = () => { if (confirm("Supprimer cette pesée ?")) { put(K, records().filter(x => x.id !== sid)); closeSheet(); renderAll(); toast("Pesée supprimée") } };
 $("#exp").onclick = () => {
   const R = records();
   if (!R.length) return toast("Aucune donnée à exporter");
-  const H = ["ID", "Date_ISO", "Date_Locale", "Utilisateur", "Poids_kg", "Masse_Grasse_pct", "Eau_pct", "Muscle_pct", "Os_kg", "BMR_kcal"];
-  const rows = R.map(r => [r.id, r.timestamp, `"${new Date(r.timestamp).toLocaleString()}"`, r.userId ?? "", r.weight ?? "", r.fat ?? "", r.water ?? "", r.muscle ?? "", r.bone ?? "", r.kcal ?? ""].join(";"));
+  const H = ["ID", "Date_ISO", "Date_Locale", "Utilisateur", "Poids_kg", "Masse_Grasse_pct", "Eau_pct", "Muscle_pct", "Os_kg", "BMR_kcal", "Note"];
+  const rows = R.map(r => [r.id, r.timestamp, `"${new Date(r.timestamp).toLocaleString()}"`, r.userId ?? "", r.weight ?? "", r.fat ?? "", r.water ?? "", r.muscle ?? "", r.bone ?? "", r.kcal ?? "", `"${(r.note || "").replace(/["\r\n;]/g, " ")}"`].join(";"));
   const url = URL.createObjectURL(new Blob(["\uFEFF" + [H.join(";"), ...rows].join("\r\n")], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a"); a.href = url; a.download = `medisana_bs444_${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 };
 
-const renderAll = () => { renderHome(); renderHist() };
+/* ---------- Profil ---------- */
+const age = b => { const d = new Date(b), n = new Date(); let a = n.getFullYear() - d.getFullYear(); if (n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--; return a };
+function renderMe() {
+  const s = settings(), R = records(), cur = R[0], start = R.length ? R[R.length - 1].weight : null;
+  const pct = cur && start != null && start !== s.goal ? Math.round(Math.max(0, Math.min(1, (start - cur.weight) / (start - s.goal))) * 100) : 0;
+  const row = (l, v, a) => `<div class="rw" data-a="${a}"><span>${l}</span><span>${v || "À renseigner"} ›</span></div>`;
+  const on = $("#ble").classList.contains("on");
+  $("#mc").innerHTML =
+    `<div class="card" data-a="name" style="flex-direction:row;align-items:center;gap:14px;cursor:pointer"><div class="av">${(s.name || "?")[0].toUpperCase()}</div><div style="flex:1"><b style="font-size:20px">${s.name || "Sans nom"}</b><small style="display:block;color:var(--ac);font-weight:600">Modifier mon profil</small></div></div>` +
+    `<div class="card" style="gap:0"><b>Informations personnelles</b>${row("Taille", s.height && s.height + " cm", "height")}${row("Date de naissance", s.birth && new Date(s.birth).toLocaleDateString("fr-FR") + " · " + age(s.birth) + " ans", "birth")}${row("Sexe", s.sex && (s.sex === "f" ? "Femme" : "Homme"), "sex")}</div>` +
+    `<div class="card" data-a="goal" style="cursor:pointer"><div class="row"><div class="gl"><div class="ib">${ic("target", 18)}</div><div><small>Objectif de poids</small><b>${fm(s.goal)} kg</b></div></div><span style="color:var(--ac);font-weight:600;font-size:14px">Modifier</span></div><div class="tr"><i style="width:${pct}%"></i></div><div class="row" style="font-size:12px;color:var(--t2)"><span>Départ ${fm(start)} kg</span><span>Actuel ${fm(cur && cur.weight)} kg</span><b style="color:var(--ac)">${pct} %</b></div></div>` +
+    `<div class="card" data-a="bal" style="flex-direction:row;align-items:center;gap:12px;cursor:pointer"><div class="ib" style="width:42px;height:42px">${ic("refresh", 20)}</div><div style="flex:1"><b>Ma balance · BS444</b><small style="display:block">${cur ? "Dernière pesée · " + dayLabel(cur.timestamp) : "Aucune pesée"}</small></div><span class="tag ${on ? "g" : ""}">${on ? "Connectée" : "Hors ligne"}</span></div>` +
+    `<div class="card" style="gap:0"><b>Données et suivi</b><div class="rw" data-a="exp"><span>Exporter les données<small>Fichier CSV</small></span><span>›</span></div><div class="rw" data-a="imp"><span>Importer les données<small>Fichier CSV exporté par l'app</small></span><span>›</span></div></div>`;
+}
+const ACT = {
+  name() { const v = prompt("Ton prénom", settings().name); if (v !== null) { setS({ name: v.trim() }); renderAll() } },
+  height() { const v = prompt("Taille (cm)", settings().height || ""); if (v === null) return; const n = parseFloat(v.replace(",", ".")); if (!(n > 100 && n < 250)) return toast("Entre une taille valide, par exemple 178"); setS({ height: n }); renderAll() },
+  birth() { const v = prompt("Date de naissance (JJ/MM/AAAA)", ""); if (v === null) return; const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if (!m || isNaN(new Date(`${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`))) return toast("Format attendu : JJ/MM/AAAA"); setS({ birth: `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` }); renderAll() },
+  sex() { setS({ sex: settings().sex === "m" ? "f" : "m" }); renderAll() },
+  goal() { $("#goal").click() },
+  bal() { show("home") },
+  exp() { $("#exp").click() },
+  imp() { $("#imp").click() }
+};
+$("#mc").onclick = e => { const a = e.target.closest("[data-a]"); if (a && ACT[a.dataset.a]) ACT[a.dataset.a]() };
+const csv = l => { const o = []; let c = "", q = 0; for (const ch of l) { if (ch === '"') q = !q; else if (ch === ";" && !q) { o.push(c); c = "" } else c += ch } o.push(c); return o };
+$("#imp").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const L = (await f.text()).replace(/^\uFEFF/, "").split(/\r?\n/).filter(Boolean).slice(1), list = records(), ids = new Set(list.map(r => r.id)); let n = 0;
+  for (const l of L) {
+    const c = csv(l), w = parseFloat(c[4]), d = new Date(c[1]); if (!(w > 0) || isNaN(d) || (c[0] && ids.has(c[0]))) continue;
+    const nn = i => c[i] == null || c[i] === "" ? null : parseFloat(c[i]), id = c[0] || "id_" + Date.now() + "_" + n;
+    list.push({ id, timestamp: d.toISOString(), weight: w, fat: nn(5), water: nn(6), muscle: nn(7), bone: nn(8), kcal: nn(9), userId: c[3] === "" || c[3] == null ? null : +c[3], note: (c[10] || "").trim() || undefined }); ids.add(id); n++;
+  }
+  put(K, list); renderAll(); toast(n ? `${n} pesée${n > 1 ? "s" : ""} importée${n > 1 ? "s" : ""}` : "Aucune nouvelle pesée"); e.target.value = "";
+};
+
+const renderAll = () => { renderHome(); renderEvo(); renderBody(); renderHist(); renderMe() };
 
 /* ---------- Bluetooth (logique issue du fichier de base) ---------- */
-function setBle(state, label) { const b = $("#ble"); b.className = "pill " + state; b.querySelector("span").textContent = label }
+function setBle(state, label) { const b = $("#ble"); b.className = "pill " + state; b.querySelector("span").textContent = label; if (typeof renderMe === "function") renderMe() }
 let cur = null, saveT;   // pesée en cours (créée au clic, comme dans la version d'origine)
 const newRec = () => ({ id: crypto.randomUUID ? crypto.randomUUID() : "id_" + Date.now() + "_" + Math.random().toString(36).slice(2, 11), timestamp: new Date().toISOString(), weight: null, fat: null, water: null, muscle: null, bone: null, kcal: null, userId: null });
 function commit() {
@@ -261,7 +422,7 @@ function onWeight(v) {
   if (!cur) cur = newRec();
   cur.weight = parseFloat((v.getUint16(1, true) / 100).toFixed(2));
   cur.userId = v.getUint8(13);
-  $("#w").textContent = fm(cur.weight); $("#wt").textContent = "Mesure en cours…";
+  $("#w").textContent = fm(cur.weight); $("#wt").textContent = "Pesée reçue…";
   commit();
 }
 function onBody(v) {
@@ -291,7 +452,8 @@ async function sync() {
     try {
       await (await svc.getCharacteristic(CC)).writeValue(new Uint8Array([0x02, 0x7b, 0x7b, 0xf6, 0x0d]));
     } catch (err) { console.warn("Handshake CMD optionnel :", err) }
-    setBle("on", "Connectée"); st.textContent = "Connectée ! Monte sur la balance pieds nus…";
+    setBle("on", "Connectée"); st.textContent = "Connectée ! Récupération de ta pesée…";
+    setTimeout(() => { if (cur && cur.weight === null) st.textContent = "Aucune pesée reçue. Pèse-toi d'abord (attends la fin de l'affichage), puis relance la synchronisation." }, 8000);
   } catch (err) {
     setBle("", "BS444"); btn.disabled = false; btn.classList.remove("spin");
     st.textContent = err.name === "NotFoundError" ? "Aucune balance sélectionnée." : "Erreur : " + err.message;
