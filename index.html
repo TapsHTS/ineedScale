@@ -149,7 +149,7 @@
 
   function saveRecord(record) {
     const list = getRecords();
-    list.unshift(record); // Ajout au début
+    list.unshift(record);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     renderHistory();
   }
@@ -182,7 +182,6 @@
       return;
     }
 
-    // En-têtes CSV
     const headers = ["ID", "Date_ISO", "Date_Locale", "Utilisateur", "Poids_kg", "Masse_Grasse_pct", "Eau_pct", "Muscle_pct", "Os_kg", "BMR_kcal"];
     
     const rows = records.map(r => {
@@ -201,7 +200,7 @@
       ].join(";");
     });
 
-    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\r\n"); // \uFEFF = BOM pour Excel
+    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     
@@ -240,7 +239,6 @@
 
   function commitRecordDelayed() {
     clearTimeout(saveTimeout);
-    // On attend 2 secondes après la dernière trame reçue pour enregistrer
     saveTimeout = setTimeout(() => {
       if (currentRecord && currentRecord.weight !== null) {
         saveRecord(currentRecord);
@@ -256,8 +254,14 @@
       status.innerText = "Recherche de la balance...";
       initNewRecord();
 
+      // Filtrage ciblé inspiré d'openScale
       const device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
+        filters: [
+          { namePrefix: '02' },        // Préfixe Transtek/Medisana usine
+          { namePrefix: 'BS44' },      // Préfixe série BS 444
+          { namePrefix: 'Medisana' },
+          { services: [SERVICE_UUID] }
+        ],
         optionalServices: [SERVICE_UUID]
       });
 
@@ -309,7 +313,7 @@
         commitRecordDelayed();
       });
 
-      // 3. Handshake (Commande magique)
+      // 3. Handshake obligatoire (Magic Bytes Transtek/Medisana)
       try {
         const cmdChar = await service.getCharacteristic(CHAR_CMD);
         await cmdChar.writeValue(new Uint8Array([0x02, 0x7b, 0x7b, 0xf6, 0x0d]));
@@ -324,7 +328,6 @@
     }
   });
 
-  // Affichage au démarrage
   renderHistory();
 </script>
 
