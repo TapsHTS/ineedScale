@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medisana BS 444 Tracker</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.4rem; text-align: center; margin-bottom: 20px; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:active { opacity: 0.8; }
+    .btn-main { background-color: var(--primary); color: white; }
+    .btn-export { background-color: var(--success); color: white; }
+    .btn-clear { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
+    #status {
+      font-size: 0.95rem;
+      margin-top: 10px;
+      text-align: center;
+      color: #64748b;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat-item {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-val { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+    .stat-lbl { font-size: 0.8rem; color: #64748b; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px 4px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th { color: #64748b; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Medisana BS 444</h1>
+
+  <div class="card">
+    <div class="btn-group">
+      <button id="btnConnect" class="btn-main">Se connecter & peser</button>
+      <button id="btnExport" class="btn-export">Exporter en CSV</button>
+      <button id="btnClear" class="btn-clear">Effacer l'historique</button>
+    </div>
+    <div id="status">En attente...</div>
+  </div>
+
+  <div class="card" id="currentResultCard" style="display: none;">
+    <h3 style="margin-top:0; font-size:1rem;">Dernière mesure capturée</h3>
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-val" id="resWeight">--</div><div class="stat-lbl">Poids (kg)</div></div>
+      <div class="stat-item"><div class="stat-val" id="resFat">--</div><div class="stat-lbl">Graisse (%)</div></div>
+      <div class="stat-item"><div class="stat-val" id="resMuscle">--</div><div class="stat-lbl">Muscle (%)</div></div>
+      <div class="stat-item"><div class="stat-val" id="resWater">--</div><div class="stat-lbl">Eau (%)</div></div>
+      <div class="stat-item"><div class="stat-val" id="resBone">--</div><div class="stat-lbl">Masse osseuse (kg)</div></div>
+      <div class="stat-item"><div class="stat-val" id="resKcal">--</div><div class="stat-lbl">BMR (kcal)</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0; font-size:1rem;">Historique (<span id="historyCount">0</span>)</h3>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Poids</th>
+            <th>Graisse</th>
+            <th>Muscle</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = "medisana_bs444_records";
+  const SERVICE_UUID = "000078b2-0000-1000-8000-00805f9b34fb";
+  const CHAR_WEIGHT   = "00008a21-0000-1000-8000-00805f9b34fb";
+  const CHAR_BODY     = "00008a22-0000-1000-8000-00805f9b34fb";
+  const CHAR_CMD      = "00008a81-0000-1000-8000-00805f9b34fb";
+
+  let currentRecord = null;
+  let saveTimeout = null;
+
+  // --- Gestion du LocalStorage ---
+  function getRecords() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveRecord(record) {
+    const list = getRecords();
+    list.unshift(record); // Ajout au début
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const records = getRecords();
+    document.getElementById('historyCount').innerText = records.length;
+    const tbody = document.getElementById('historyBody');
+    tbody.innerHTML = "";
+
+    records.slice(0, 15).forEach(r => {
+      const tr = document.createElement('tr');
+      const d = new Date(r.timestamp);
+      const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      tr.innerHTML = `
+        <td>${dateStr}</td>
+        <td><strong>${r.weight ?? '--'} kg</strong></td>
+        <td>${r.fat ? r.fat + '%' : '--'}</td>
+        <td>${r.muscle ? r.muscle + '%' : '--'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // --- Export CSV ---
+  document.getElementById('btnExport').addEventListener('click', () => {
+    const records = getRecords();
+    if (!records.length) {
+      alert("Aucune donnée enregistrée à exporter.");
+      return;
+    }
+
+    // En-têtes CSV
+    const headers = ["ID", "Date_ISO", "Date_Locale", "Utilisateur", "Poids_kg", "Masse_Grasse_pct", "Eau_pct", "Muscle_pct", "Os_kg", "BMR_kcal"];
+    
+    const rows = records.map(r => {
+      const d = new Date(r.timestamp);
+      return [
+        r.id,
+        r.timestamp,
+        `"${d.toLocaleString()}"`,
+        r.userId ?? "",
+        r.weight ?? "",
+        r.fat ?? "",
+        r.water ?? "",
+        r.muscle ?? "",
+        r.bone ?? "",
+        r.kcal ?? ""
+      ].join(";");
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\r\n"); // \uFEFF = BOM pour Excel
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `medisana_bs444_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // --- Nettoyage ---
+  document.getElementById('btnClear').addEventListener('click', () => {
+    if (confirm("Voulez-vous vraiment supprimer tout l'historique ?")) {
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+      document.getElementById('currentResultCard').style.display = 'none';
+    }
+  });
+
+  // --- BLE & Mesures ---
+  function initNewRecord() {
+    currentRecord = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)),
+      timestamp: new Date().toISOString(),
+      weight: null,
+      fat: null,
+      water: null,
+      muscle: null,
+      bone: null,
+      kcal: null,
+      userId: null
+    };
+  }
+
+  function commitRecordDelayed() {
+    clearTimeout(saveTimeout);
+    // On attend 2 secondes après la dernière trame reçue pour enregistrer
+    saveTimeout = setTimeout(() => {
+      if (currentRecord && currentRecord.weight !== null) {
+        saveRecord(currentRecord);
+        document.getElementById('status').innerText = "Mesure enregistrée avec succès !";
+        currentRecord = null;
+      }
+    }, 2000);
+  }
+
+  document.getElementById('btnConnect').addEventListener('click', async () => {
+    const status = document.getElementById('status');
+    try {
+      status.innerText = "Recherche de la balance...";
+      initNewRecord();
+
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [SERVICE_UUID]
+      });
+
+      status.innerText = "Connexion BLE en cours...";
+      const server = await device.gatt.connect();
+      const service = await server.getPrimaryService(SERVICE_UUID);
+
+      // 1. Trame Poids
+      const weightChar = await service.getCharacteristic(CHAR_WEIGHT);
+      await weightChar.startNotifications();
+      weightChar.addEventListener('characteristicvaluechanged', (e) => {
+        const v = e.target.value;
+        const weightRaw = v.getUint16(1, true);
+        const weightKg = parseFloat((weightRaw / 100).toFixed(2));
+        const userId = v.getUint8(13);
+
+        currentRecord.weight = weightKg;
+        currentRecord.userId = userId;
+
+        document.getElementById('currentResultCard').style.display = 'block';
+        document.getElementById('resWeight').innerText = weightKg;
+
+        commitRecordDelayed();
+      });
+
+      // 2. Trame Impédance
+      const bodyChar = await service.getCharacteristic(CHAR_BODY);
+      await bodyChar.startNotifications();
+      bodyChar.addEventListener('characteristicvaluechanged', (e) => {
+        const v = e.target.value;
+        const kcal = v.getUint16(6, true);
+        const fat = parseFloat(((v.getUint16(8, true) & 0x0FFF) / 10).toFixed(1));
+        const water = parseFloat(((v.getUint16(10, true) & 0x0FFF) / 10).toFixed(1));
+        const muscle = parseFloat(((v.getUint16(12, true) & 0x0FFF) / 10).toFixed(1));
+        const bone = parseFloat(((v.getUint16(14, true) & 0x0FFF) / 10).toFixed(1));
+
+        currentRecord.fat = fat;
+        currentRecord.water = water;
+        currentRecord.muscle = muscle;
+        currentRecord.bone = bone;
+        currentRecord.kcal = kcal;
+
+        document.getElementById('resFat').innerText = fat;
+        document.getElementById('resWater').innerText = water;
+        document.getElementById('resMuscle').innerText = muscle;
+        document.getElementById('resBone').innerText = bone;
+        document.getElementById('resKcal').innerText = kcal;
+
+        commitRecordDelayed();
+      });
+
+      // 3. Handshake (Commande magique)
+      try {
+        const cmdChar = await service.getCharacteristic(CHAR_CMD);
+        await cmdChar.writeValue(new Uint8Array([0x02, 0x7b, 0x7b, 0xf6, 0x0d]));
+      } catch (err) {
+        console.warn("Handshake CMD optionnel :", err);
+      }
+
+      status.innerText = "Connecté ! Montez sur la balance pieds nus...";
+
+    } catch (err) {
+      status.innerText = "Erreur : " + err.message;
+    }
+  });
+
+  // Affichage au démarrage
+  renderHistory();
+</script>
+
+</body>
+</html>
